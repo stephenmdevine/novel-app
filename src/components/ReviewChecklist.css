@@ -1,0 +1,139 @@
+.review-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.review-panel {
+  background: #232323;
+  border: 1px solid #3a3a3a;
+  border-radius: 10px;
+  width: 520px;
+  padding: 24px;
+  color: #eee;
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.review-header h2 {
+  font-size: 16px;
+  margin: 0;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 22px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.review-progress {
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 18px;
+}
+
+.progress-bar {
+  height: 6px;
+  background: #3a3a3a;
+  border-radius: 3px;
+  margin-top: 6px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #5b8def;
+  transition: width 0.2s ease;
+}
+
+.review-step {
+  background: #1a1a1a;
+  border: 1px solid #3a3a3a;
+  border-radius: 8px;
+  padding: 18px;
+  margin-bottom: 18px;
+  min-height: 110px;
+}
+
+.step-counter {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #888;
+  margin-bottom: 8px;
+}
+
+.step-question {
+  font-size: 15px;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+.step-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #ddd;
+  cursor: pointer;
+}
+
+.review-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.review-nav button {
+  background: #3a3a3a;
+  border: none;
+  color: #eee;
+  padding: 6px 14px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.review-nav button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.review-nav button:hover:not(:disabled) {
+  background: #4a4a4a;
+}
+
+.review-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.review-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #444;
+  cursor: pointer;
+  display: inline-block;
+}
+
+.review-dot.done {
+  background: #5b8def;
+}
+
+.review-dot.current {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}

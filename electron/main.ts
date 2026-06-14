@@ -1,0 +1,144 @@
+import { app, BrowserWindow, ipcMain, dialog, session } from 'electron';
+import path from 'path';
+import fs from 'fs/promises';
+import { existsSync, mkdirSync } from 'fs';
+
+const isDev = !app.isPackaged;
+
+// Root directory where all novels are stored
+const NOVELS_ROOT = path.join(app.getPath('documents'), 'NovelWriter', 'novels');
+
+function ensureRoot() {
+  if (!existsSync(NOVELS_ROOT)) {
+    mkdirSync(NOVELS_ROOT, { recursive: true });
+  }
+}
+
+function createWindow() {
+  const win = new BrowserWindow({
+    width: 1400,
+    height: 900,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.cjs'),
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+  });
+
+  // Enable Electron's built-in spellchecker
+  win.webContents.session.setSpellCheckerEnabled(true);
+  win.webContents.session.setSpellCheckerLanguages(['en-US']);
+
+  if (isDev) {
+    win.loadURL('http://localhost:5173');
+    win.webContents.openDevTools();
+  } else {
+    win.loadFile(path.join(__dirname, '../dist/index.html'));
+  }
+}
+
+app.whenReady().then(() => {
+  ensureRoot();
+  createWindow();
+
+  app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+  });
+});
+
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') app.quit();
+});
+
+// ---------- IPC: Novel-level operations ----------
+
+ipcMain.handle('novels:list', async () => {
+  ensureRoot();
+  const entries = await fs.readdir(NOVELS_ROOT, { withFileTypes: true });
+  const novels = [];
+  for (const entry of entries) {
+    if (entry.isDirectory()) {
+      const novelPath = path.join(NOVELS_ROOT, entry.name);
+      const metaPath = path.join(novelPath, 'novel.json');
+      if (existsSync(metaPath)) {
+        const data = await fs.readFile(metaPath, 'utf-8');
+        novels.push(JSON.parse(data));
+      }
+    }
+  }
+  return novels;
+});
+
+ipcMain.handle('novels:create', async (_evt, novel) => {
+  const novelDir = path.join(NOVELS_ROOT, novel.id);
+  await fs.mkdir(path.join(novelDir, 'scenes'), { recursive: true });
+  await fs.writeFile(path.join(novelDir, 'novel.json'), JSON.stringify(novel, null, 2));
+  await fs.writeFile(path.join(novelDir, 'tags.json'), JSON.stringify([], null, 2));
+  return novel;
+});
+
+ipcMain.handle('novels:save', async (_evt, novel) => {
+  const novelDir = path.join(NOVELS_ROOT, novel.id);
+  await fs.writeFile(path.join(novelDir, 'novel.json'), JSON.stringify(novel, null, 2));
+  return novel;
+});
+
+ipcMain.handle('novels:delete', async (_evt, novelId) => {
+  const novelDir = path.join(NOVELS_ROOT, novelId);
+  await fs.rm(novelDir, { recursive: true, force: true });
+  return true;
+});
+
+// ---------- IPC: Scene-level operations ----------
+
+ipcMain.handle('scenes:list', async (_evt, novelId) => {
+  const scenesDir = path.join(NOVELS_ROOT, novelId, 'scenes');
+  if (!existsSync(scenesDir)) return [];
+  const files = await fs.readdir(scenesDir);
+  const scenes = [];
+  for (const file of files.filter((f) => f.endsWith('.json'))) {
+    const data = await fs.readFile(path.join(scenesDir, file), 'utf-8');
+    const scene = JSON.parse(data);
+    scenes.push(scene);
+  }
+  // sort by order field
+  scenes.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  return scenes;
+});
+
+ipcMain.handle('scenes:save', async (_evt, novelId, scene) => {
+  const scenesDir = path.join(NOVELS_ROOT, novelId, 'scenes');
+  await fs.mkdir(scenesDir, { recursive: true });
+  await fs.writeFile(path.join(scenesDir, `${scene.id}.json`), JSON.stringify(scene, null, 2));
+  return scene;
+});
+
+ipcMain.handle('scenes:delete', async (_evt, novelId, sceneId) => {
+  const scenePath = path.join(NOVELS_ROOT, novelId, 'scenes', `${sceneId}.json`);
+  await fs.rm(scenePath, { force: true });
+  return true;
+});
+
+// ---------- IPC: Tag operations ----------
+
+ipcMain.handle('tags:list', async (_evt, novelId) => {
+  const tagsPath = path.join(NOVELS_ROOT, novelId, 'tags.json');
+  if (!existsSync(tagsPath)) return [];
+  const data = await fs.readFile(tagsPath, 'utf-8');
+  return JSON.parse(data);
+});
+
+ipcMain.handle('tags:save', async (_evt, novelId, tags) => {
+  const tagsPath = path.join(NOVELS_ROOT, novelId, 'tags.json');
+  await fs.writeFile(tagsPath, JSON.stringify(tags, null, 2));
+  return tags;
+});
+
+// ---------- IPC: Misc ----------
+
+ipcMain.handle('app:getNovelsRoot', () => NOVELS_ROOT);
+
+ipcMain.handle('app:revealInFolder', async (_evt, novelId) => {
+  const { shell } = require('electron');
+  shell.showItemInFolder(path.join(NOVELS_ROOT, novelId, 'novel.json'));
+});

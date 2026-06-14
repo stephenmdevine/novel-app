@@ -1,0 +1,133 @@
+.novel-library {
+  padding: 40px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.library-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.library-header h1 {
+  font-size: 24px;
+  margin: 0;
+}
+
+.library-header button {
+  background: #5b8def;
+  border: none;
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.new-novel-form {
+  background: #232323;
+  border: 1px solid #3a3a3a;
+  border-radius: 8px;
+  padding: 18px;
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.new-novel-form input {
+  background: #1a1a1a;
+  border: 1px solid #3a3a3a;
+  border-radius: 5px;
+  color: #eee;
+  padding: 8px 10px;
+  font-size: 13px;
+}
+
+.form-row {
+  display: flex;
+  gap: 10px;
+}
+
+.form-row input {
+  flex: 1;
+}
+
+.create-btn {
+  background: #5b8def;
+  border: none;
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  align-self: flex-start;
+  font-size: 13px;
+}
+
+.novel-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.novel-card {
+  background: #232323;
+  border: 1px solid #3a3a3a;
+  border-radius: 8px;
+  padding: 16px;
+  cursor: pointer;
+  position: relative;
+  transition: border-color 0.15s ease;
+}
+
+.novel-card:hover {
+  border-color: #5b8def;
+}
+
+.novel-card h2 {
+  font-size: 16px;
+  margin: 0 0 8px 0;
+}
+
+.novel-genres {
+  font-size: 12px;
+  color: #aac4ff;
+  margin-bottom: 4px;
+}
+
+.novel-theme {
+  font-size: 12px;
+  color: #999;
+}
+
+.delete-novel-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #3a3a3a;
+  border: none;
+  color: #ccc;
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.novel-card:hover .delete-novel-btn {
+  opacity: 1;
+}
+
+.delete-novel-btn:hover {
+  background: #e57373;
+  color: #fff;
+}
+
+.library-empty {
+  color: #888;
+  font-size: 13px;
+  grid-column: 1 / -1;
+}
