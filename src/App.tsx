@@ -157,9 +157,13 @@ export default function App() {
       <header className="app-header">
         <button className="back-btn" onClick={() => setActiveNovelId(null)}>&larr; Library</button>
         <div className="novel-title-block">
-          <h1>{activeNovel.title}</h1>
+          {editingNovelInfo ? (
+            <h1 style={{ color: '#aac4ff' }}>{activeNovel.title || 'Untitled'}</h1>
+          ) : (
+            <h1>{activeNovel.title}</h1>
+          )}
           <button className="edit-meta-btn" onClick={() => setEditingNovelInfo((s) => !s)}>
-            {editingNovelInfo ? 'Done' : 'Edit genres/theme'}
+            {editingNovelInfo ? 'Done' : 'Edit title / genres / theme'}
           </button>
         </div>
         <div className="header-actions">
@@ -173,6 +177,13 @@ export default function App() {
 
       {editingNovelInfo && (
         <div className="novel-meta-editor">
+          <label className="theme-label">
+            Title
+            <input
+              value={activeNovel.title}
+              onChange={(e) => handleSaveNovelMeta({ title: e.target.value })}
+            />
+          </label>
           <label>
             Genre 1
             <input

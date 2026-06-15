@@ -68,6 +68,26 @@
   font-family: 'Georgia', 'Times New Roman', serif;
 }
 
+.editor-content .ProseMirror p {
+  margin: 0;
+  text-indent: 2em;
+}
+
+/* Don't indent the very first paragraph or paragraphs after headings */
+.editor-content .ProseMirror p:first-child,
+.editor-content .ProseMirror h1 + p,
+.editor-content .ProseMirror h2 + p,
+.editor-content .ProseMirror h3 + p {
+  text-indent: 0;
+}
+
+/* Empty paragraphs (just a line break) get no indent */
+.editor-content .ProseMirror p:empty,
+.editor-content .ProseMirror p > br:only-child {
+  text-indent: 0;
+  margin: 0.4em 0;
+}
+
 .entity-tag {
   background: rgba(91, 141, 239, 0.25);
   border-bottom: 2px solid #5b8def;
@@ -113,6 +133,69 @@
 .tag-menu-new {
   border-top: 1px solid #444;
   color: #5b8def;
+}
+
+.tag-menu-form {
+  padding: 12px;
+  min-width: 220px;
+}
+
+.tag-form-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #aac4ff;
+  margin-bottom: 10px;
+}
+
+.tag-form-label {
+  display: block;
+  font-size: 11px;
+  color: #999;
+  margin-bottom: 4px;
+}
+
+.tag-form-input {
+  width: 100%;
+  background: #1a1a1a;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  color: #eee;
+  padding: 6px 8px;
+  font-size: 13px;
+  box-sizing: border-box;
+  margin-bottom: 10px;
+}
+
+.tag-form-input:focus {
+  outline: 1px solid #5b8def;
+}
+
+.tag-form-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.tag-form-cancel {
+  background: #3a3a3a;
+  border: none;
+  color: #ccc;
+  padding: 5px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.tag-form-submit {
+  background: #5b8def;
+  border: none;
+  color: #fff;
+  padding: 5px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
 }
 
 .tag-dot {

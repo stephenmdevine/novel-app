@@ -29,12 +29,12 @@ export interface SceneElements {
 }
 
 export const DEFAULT_SCENE_ELEMENT_LABELS: Record<keyof SceneElements, string> = {
-  goal: 'Goal',
-  conflict: 'Conflict',
-  incitingIncident: 'Inciting Incident',
-  complications: 'Complications',
-  turningPoint: 'Turning Point',
-  outcomeHook: 'Outcome / Hook',
+  goal: 'Inciting Incident',
+  conflict: 'Progressive Complications',
+  incitingIncident: 'Turning Point',
+  complications: 'Crisis',
+  turningPoint: 'Climax',
+  outcomeHook: 'Resolution',
 };
 
 export interface Scene {
