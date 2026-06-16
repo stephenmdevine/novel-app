@@ -39,6 +39,12 @@ export default function SceneEditor({
   const savedSelection = useRef<{ from: number; to: number } | null>(null);
   const newTagNameRef = useRef<HTMLInputElement>(null);
   const mustEditNoteRef = useRef<HTMLInputElement>(null);
+  const [toast, setToast] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 2200);
+  };
 
   const editor = useEditor({
     extensions: [
@@ -99,7 +105,7 @@ export default function SceneEditor({
     setMustEditMenu('closed');
     if (tagMenu !== 'closed') { setTagMenu('closed'); return; }
     const { from, to } = editor.state.selection;
-    if (from === to) { alert('Select some text in the editor first, then click "Tag Selection".'); return; }
+    if (from === to) { showToast('Select some text first, then click "Tag Selection".'); editor.commands.focus(); return; }
     savedSelection.current = { from, to };
     setNewTagName(editor.state.doc.textBetween(from, to));
     setTagMenu('list');
@@ -128,7 +134,7 @@ export default function SceneEditor({
     setTagMenu('closed');
     if (mustEditMenu !== 'closed') { setMustEditMenu('closed'); return; }
     const { from, to } = editor.state.selection;
-    if (from === to) { alert('Select the text you want to mark for future editing first.'); return; }
+    if (from === to) { showToast('Select the text you want to mark first.'); editor.commands.focus(); return; }
     savedSelection.current = { from, to };
     setMustEditNote('');
     setMustEditMenu('form');
@@ -163,7 +169,8 @@ export default function SceneEditor({
       });
     });
     if (resolvedMarks.length === 0) {
-      alert('Place your cursor inside a highlighted must-edit passage first.');
+      showToast('Place your cursor inside a highlighted must-edit passage first.');
+      editor.commands.focus();
       return;
     }
     resolvedMarks.forEach((id) => {
@@ -297,6 +304,7 @@ export default function SceneEditor({
       </div>
 
       <EditorContent editor={editor} className="editor-content" spellCheck={true} />
+      {toast && <div className="editor-toast">{toast}</div>}
     </div>
   );
 }

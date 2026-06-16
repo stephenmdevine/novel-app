@@ -6,6 +6,7 @@
   border-radius: 8px;
   overflow: hidden;
   background: #1e1e1e;
+  position: relative;
 }
 
 .editor-toolbar {
@@ -66,6 +67,7 @@
   line-height: 1.7;
   color: #e8e8e8;
   font-family: 'Georgia', 'Times New Roman', serif;
+  caret-color: #e8e8e8;
 }
 
 .editor-content .ProseMirror p {
@@ -123,6 +125,29 @@
   border-bottom: 2px solid #5b8def;
   border-radius: 2px;
   padding: 0 1px;
+}
+
+.editor-toast {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #2a2a2a;
+  border: 1px solid #4a4a4a;
+  color: #ddd;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  pointer-events: none;
+  animation: toast-fade 2.2s ease forwards;
+}
+
+@keyframes toast-fade {
+  0% { opacity: 0; transform: translate(-50%, 6px); }
+  10% { opacity: 1; transform: translate(-50%, 0); }
+  85% { opacity: 1; }
+  100% { opacity: 0; }
 }
 
 .tag-control {
