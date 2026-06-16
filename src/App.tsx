@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { Novel, Scene, Tag } from './types';
+import type { Novel, Scene, Tag, TodoItem } from './types';
 import { createEmptyNovel, createEmptyScene } from './lib/defaults';
 import NovelLibrary from './components/NovelLibrary';
 import SceneList from './components/SceneList';
@@ -18,16 +18,15 @@ export default function App() {
   const [showReview, setShowReview] = useState(false);
   const [showTagPanel, setShowTagPanel] = useState(false);
   const [editingNovelInfo, setEditingNovelInfo] = useState(false);
+  const [mustEditJumpId, setMustEditJumpId] = useState<string | null>(null);
 
   const activeNovel = novels.find((n) => n.id === activeNovelId) ?? null;
   const activeScene = scenes.find((s) => s.id === activeSceneId) ?? null;
 
-  // ----- Load novels on startup -----
   useEffect(() => {
     window.api.listNovels().then(setNovels);
   }, []);
 
-  // ----- Load scenes & tags when a novel is opened -----
   useEffect(() => {
     if (!activeNovelId) return;
     window.api.listScenes(activeNovelId).then((s) => {
@@ -102,7 +101,32 @@ export default function App() {
     persistScene(activeSceneId, { reviewState });
   };
 
-  // Simple direct write per change (JSON file IO is cheap at this scale)
+  const handleTodosChange = (todos: TodoItem[]) => {
+    if (!activeSceneId) return;
+    setScenes((prev) => prev.map((s) => (s.id === activeSceneId ? { ...s, todos } : s)));
+    persistScene(activeSceneId, { todos });
+  };
+
+  const handleAddMustEdit = (markerId: string, note: string, selectedText: string) => {
+    if (!activeScene) return;
+    const newTodo: TodoItem = {
+      id: crypto.randomUUID(),
+      label: note || `Edit: "${selectedText}"`,
+      done: false,
+      mustEditMarkerId: markerId,
+    };
+    const todos = [...(activeScene.todos ?? []), newTodo];
+    handleTodosChange(todos);
+  };
+
+  const handleResolveMustEdit = (markerId: string) => {
+    if (!activeScene) return;
+    const todos = (activeScene.todos ?? []).map((t) =>
+      t.mustEditMarkerId === markerId ? { ...t, done: true } : t
+    );
+    handleTodosChange(todos);
+  };
+
   const persistScene = async (sceneId: string, updates: Partial<Scene>) => {
     if (!activeNovelId) return;
     const scene = scenes.find((s) => s.id === sceneId);
@@ -113,12 +137,7 @@ export default function App() {
 
   // ----- Tag operations -----
   const handleCreateTag = (name: string, type: Tag['type']): Tag => {
-    const tag: Tag = {
-      id: crypto.randomUUID(),
-      name,
-      type,
-      attributes: {},
-    };
+    const tag: Tag = { id: crypto.randomUUID(), name, type, attributes: {} };
     const updated = [...tags, tag];
     setTags(updated);
     if (activeNovelId) window.api.saveTags(activeNovelId, updated);
@@ -138,7 +157,6 @@ export default function App() {
   };
 
   // ----- Render -----
-
   if (!activeNovel) {
     return (
       <NovelLibrary
@@ -157,11 +175,10 @@ export default function App() {
       <header className="app-header">
         <button className="back-btn" onClick={() => setActiveNovelId(null)}>&larr; Library</button>
         <div className="novel-title-block">
-          {editingNovelInfo ? (
-            <h1 style={{ color: '#aac4ff' }}>{activeNovel.title || 'Untitled'}</h1>
-          ) : (
-            <h1>{activeNovel.title}</h1>
-          )}
+          {editingNovelInfo
+            ? <h1 style={{ color: '#aac4ff' }}>{activeNovel.title || 'Untitled'}</h1>
+            : <h1>{activeNovel.title}</h1>
+          }
           <button className="edit-meta-btn" onClick={() => setEditingNovelInfo((s) => !s)}>
             {editingNovelInfo ? 'Done' : 'Edit title / genres / theme'}
           </button>
@@ -169,9 +186,7 @@ export default function App() {
         <div className="header-actions">
           <span className="total-words">{totalWordCount} total words</span>
           <button onClick={() => setShowTagPanel(true)}>Tags &amp; References</button>
-          <button onClick={() => setShowReview(true)} disabled={!activeScene}>
-            Review Checklist
-          </button>
+          <button onClick={() => setShowReview(true)} disabled={!activeScene}>Review Checklist</button>
         </div>
       </header>
 
@@ -226,9 +241,19 @@ export default function App() {
                 tags={tags}
                 onChange={handleEditorChange}
                 onCreateTag={handleCreateTag}
+                onAddMustEdit={handleAddMustEdit}
+                onResolveMustEdit={handleResolveMustEdit}
+                mustEditJumpId={mustEditJumpId}
+                onJumpHandled={() => setMustEditJumpId(null)}
               />
             </div>
-            <SceneSidebar novel={activeNovel} scene={activeScene} onElementsChange={handleElementsChange} />
+            <SceneSidebar
+              novel={activeNovel}
+              scene={activeScene}
+              onElementsChange={handleElementsChange}
+              onTodosChange={handleTodosChange}
+              onJumpToMarker={(id) => setMustEditJumpId(id)}
+            />
           </>
         ) : (
           <div className="no-scene">Select or create a scene to begin writing.</div>

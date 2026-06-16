@@ -1,14 +1,17 @@
-import type { Novel, Scene, SceneElements } from '../types';
+import type { Novel, Scene, SceneElements, TodoItem } from '../types';
 import { DEFAULT_SCENE_ELEMENT_LABELS } from '../types';
+import SceneTodoList from './SceneTodoList';
 import './SceneSidebar.css';
 
 interface SceneSidebarProps {
   novel: Novel;
   scene: Scene;
   onElementsChange: (elements: SceneElements) => void;
+  onTodosChange: (todos: TodoItem[]) => void;
+  onJumpToMarker: (markerId: string) => void;
 }
 
-export default function SceneSidebar({ novel, scene, onElementsChange }: SceneSidebarProps) {
+export default function SceneSidebar({ novel, scene, onElementsChange, onTodosChange, onJumpToMarker }: SceneSidebarProps) {
   const update = (key: keyof SceneElements, value: string) => {
     onElementsChange({ ...scene.elements, [key]: value });
   };
@@ -41,6 +44,12 @@ export default function SceneSidebar({ novel, scene, onElementsChange }: SceneSi
           </div>
         ))}
       </div>
+
+      <SceneTodoList
+        todos={scene.todos ?? []}
+        onChange={onTodosChange}
+        onJumpToMarker={onJumpToMarker}
+      />
     </div>
   );
 }

@@ -37,6 +37,18 @@ export const DEFAULT_SCENE_ELEMENT_LABELS: Record<keyof SceneElements, string> =
   outcomeHook: 'Resolution',
 };
 
+export interface TodoItem {
+  id: string;
+  label: string;
+  done: boolean;
+  mustEditMarkerId?: string; // if set, linked to a must-edit marker in the editor
+}
+
+export interface MustEditMarker {
+  id: string;
+  note: string; // brief reminder note
+}
+
 export interface Scene {
   id: string;
   title: string;
@@ -45,6 +57,7 @@ export interface Scene {
   wordCount: number;
   elements: SceneElements;
   reviewState: Record<string, boolean>; // checklist item id -> completed
+  todos: TodoItem[];
   createdAt: string;
   updatedAt: string;
 }

@@ -6,6 +6,7 @@
   border-radius: 8px;
   overflow: hidden;
   background: #1e1e1e;
+  position: relative;
 }
 
 .editor-toolbar {
@@ -66,6 +67,7 @@
   line-height: 1.7;
   color: #e8e8e8;
   font-family: 'Georgia', 'Times New Roman', serif;
+  caret-color: #e8e8e8;
 }
 
 .editor-content .ProseMirror p {
@@ -88,11 +90,64 @@
   margin: 0.4em 0;
 }
 
+.must-edit-btn {
+  background: #3a2e00 !important;
+  border: 1px solid #7a6000 !important;
+  color: #e8c040 !important;
+}
+
+.must-edit-btn.active,
+.must-edit-btn:hover {
+  background: #4a3a00 !important;
+}
+
+.resolve-btn {
+  background: #1a3a1a !important;
+  border: 1px solid #2a6a2a !important;
+  color: #7ecf7e !important;
+}
+
+.resolve-btn:hover {
+  background: #1f4a1f !important;
+}
+
+/* Inline highlight for must-edit marked text */
+.must-edit-mark {
+  background: rgba(232, 192, 64, 0.25);
+  border-bottom: 2px solid #e8c040;
+  border-radius: 2px;
+  padding: 0 1px;
+  cursor: help;
+}
+
 .entity-tag {
   background: rgba(91, 141, 239, 0.25);
   border-bottom: 2px solid #5b8def;
   border-radius: 2px;
   padding: 0 1px;
+}
+
+.editor-toast {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #2a2a2a;
+  border: 1px solid #4a4a4a;
+  color: #ddd;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  pointer-events: none;
+  animation: toast-fade 2.2s ease forwards;
+}
+
+@keyframes toast-fade {
+  0% { opacity: 0; transform: translate(-50%, 6px); }
+  10% { opacity: 1; transform: translate(-50%, 0); }
+  85% { opacity: 1; }
+  100% { opacity: 0; }
 }
 
 .tag-control {
