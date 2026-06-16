@@ -47,6 +47,7 @@ export function createEmptyScene(order: number): Scene {
       outcomeHook: '',
     },
     reviewState: {},
+    todos: [],
     createdAt: now,
     updatedAt: now,
   };

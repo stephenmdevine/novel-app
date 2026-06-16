@@ -88,6 +88,36 @@
   margin: 0.4em 0;
 }
 
+.must-edit-btn {
+  background: #3a2e00 !important;
+  border: 1px solid #7a6000 !important;
+  color: #e8c040 !important;
+}
+
+.must-edit-btn.active,
+.must-edit-btn:hover {
+  background: #4a3a00 !important;
+}
+
+.resolve-btn {
+  background: #1a3a1a !important;
+  border: 1px solid #2a6a2a !important;
+  color: #7ecf7e !important;
+}
+
+.resolve-btn:hover {
+  background: #1f4a1f !important;
+}
+
+/* Inline highlight for must-edit marked text */
+.must-edit-mark {
+  background: rgba(232, 192, 64, 0.25);
+  border-bottom: 2px solid #e8c040;
+  border-radius: 2px;
+  padding: 0 1px;
+  cursor: help;
+}
+
 .entity-tag {
   background: rgba(91, 141, 239, 0.25);
   border-bottom: 2px solid #5b8def;
