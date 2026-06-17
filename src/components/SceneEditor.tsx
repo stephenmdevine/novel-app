@@ -4,7 +4,10 @@ import CharacterCount from '@tiptap/extension-character-count';
 import { useEffect, useRef, useState } from 'react';
 import { EntityTag } from '../lib/EntityTag';
 import { MustEdit } from '../lib/MustEdit';
-import type { Tag, Scene, TodoItem } from '../types';
+import { FindHighlight, findHighlightKey } from '../lib/FindHighlight';
+import { useFindReplace } from '../lib/useFindReplace';
+import FindReplaceBar from './FindReplaceBar';
+import type { Tag, Scene } from '../types';
 import './SceneEditor.css';
 
 interface SceneEditorProps {
@@ -40,6 +43,7 @@ export default function SceneEditor({
   const newTagNameRef = useRef<HTMLInputElement>(null);
   const mustEditNoteRef = useRef<HTMLInputElement>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [findOpen, setFindOpen] = useState(false);
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -52,6 +56,7 @@ export default function SceneEditor({
       CharacterCount,
       EntityTag,
       MustEdit,
+      FindHighlight,
     ],
     content: scene.content || '<p></p>',
     onUpdate: ({ editor }) => {
@@ -60,6 +65,30 @@ export default function SceneEditor({
       onChange(html, words);
     },
   });
+
+  const fr = useFindReplace(editor);
+
+  // Push match decorations into the editor whenever matches or active index change
+  useEffect(() => {
+    if (!editor) return;
+    const tr = editor.state.tr.setMeta(findHighlightKey, {
+      matches: findOpen ? fr.matches : [],
+      activeIndex: fr.activeIndex,
+    });
+    editor.view.dispatch(tr);
+  }, [editor, fr.matches, fr.activeIndex, findOpen]);
+
+  // Ctrl/Cmd+F opens find bar; Escape closes it
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f') {
+        e.preventDefault();
+        setFindOpen(true);
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, []);
 
   // Reload content when switching scenes
   useEffect(() => {
@@ -299,9 +328,21 @@ export default function SceneEditor({
           ✓ Resolve
         </button>
 
+        <button
+          onMouseDown={(e) => { e.preventDefault(); setFindOpen((o) => !o); }}
+          className={findOpen ? 'active' : ''}
+          title="Find & Replace (Ctrl+F)"
+        >
+          🔍 Find
+        </button>
+
         <div className="toolbar-spacer" />
         <div className="word-count">{words} words &middot; {chars} chars</div>
       </div>
+
+      {findOpen && (
+        <FindReplaceBar fr={fr} onClose={() => setFindOpen(false)} />
+      )}
 
       <EditorContent editor={editor} className="editor-content" spellCheck={true} />
       {toast && <div className="editor-toast">{toast}</div>}

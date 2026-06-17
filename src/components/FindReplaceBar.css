@@ -1,0 +1,129 @@
+.find-replace-bar {
+  background: #232323;
+  border-bottom: 1px solid #3a3a3a;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.find-row, .replace-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.find-input {
+  background: #1a1a1a;
+  border: 1px solid #3a3a3a;
+  border-radius: 5px;
+  color: #eee;
+  padding: 6px 10px;
+  font-size: 13px;
+  flex: 1;
+  max-width: 280px;
+}
+
+.find-input:focus {
+  outline: 1px solid #5b8def;
+}
+
+.find-match-label {
+  font-size: 12px;
+  color: #999;
+  min-width: 70px;
+}
+
+.find-icon-btn {
+  background: #3a3a3a;
+  border: none;
+  color: #ddd;
+  border-radius: 4px;
+  padding: 4px 9px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.find-icon-btn:hover:not(:disabled) {
+  background: #4a4a4a;
+}
+
+.find-icon-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.find-case-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #aaa;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+}
+
+.find-case-toggle:hover {
+  background: #2d2d2d;
+}
+
+.find-toggle-replace {
+  background: #2a2a2a;
+  border: 1px solid #3a3a3a;
+  color: #ccc;
+  border-radius: 4px;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.find-toggle-replace:hover {
+  border-color: #5b8def;
+}
+
+.find-close-btn {
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 18px;
+  cursor: pointer;
+  line-height: 1;
+  margin-left: 4px;
+}
+
+.find-close-btn:hover {
+  color: #eee;
+}
+
+.replace-row {
+  padding-left: 0;
+}
+
+.replace-btn {
+  background: #3a3a3a;
+  border: none;
+  color: #ddd;
+  border-radius: 4px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.replace-btn:hover:not(:disabled) {
+  background: #4a4a4a;
+}
+
+.replace-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.replace-all-btn {
+  background: #5b8def;
+  color: #fff;
+}
+
+.replace-all-btn:hover:not(:disabled) {
+  background: #4a7adf;
+}

@@ -150,6 +150,16 @@
   100% { opacity: 0; }
 }
 
+.find-match {
+  background: rgba(255, 235, 59, 0.35);
+  border-radius: 2px;
+}
+
+.find-match-active {
+  background: rgba(255, 152, 0, 0.55);
+  outline: 1px solid #ff9800;
+}
+
 .tag-control {
   position: relative;
 }
