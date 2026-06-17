@@ -75,14 +75,6 @@
   text-indent: 2em;
 }
 
-/* Don't indent the very first paragraph or paragraphs after headings */
-.editor-content .ProseMirror p:first-child,
-.editor-content .ProseMirror h1 + p,
-.editor-content .ProseMirror h2 + p,
-.editor-content .ProseMirror h3 + p {
-  text-indent: 0;
-}
-
 /* Empty paragraphs (just a line break) get no indent */
 .editor-content .ProseMirror p:empty,
 .editor-content .ProseMirror p > br:only-child {
