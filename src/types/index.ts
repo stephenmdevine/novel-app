@@ -89,6 +89,10 @@ export interface ElectronAPI {
   listTags: (novelId: string) => Promise<Tag[]>;
   saveTags: (novelId: string, tags: Tag[]) => Promise<Tag[]>;
 
+  listDictionaryWords: () => Promise<string[]>;
+  addDictionaryWord: (word: string) => Promise<boolean>;
+  removeDictionaryWord: (word: string) => Promise<boolean>;
+
   getNovelsRoot: () => Promise<string>;
   revealInFolder: (novelId: string) => Promise<void>;
 }

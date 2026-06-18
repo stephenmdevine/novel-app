@@ -7,6 +7,7 @@ import SceneSidebar from './components/SceneSidebar';
 import SceneEditor from './components/SceneEditor';
 import ReviewChecklist from './components/ReviewChecklist';
 import TagPanel from './components/TagPanel';
+import DictionaryPanel from './components/DictionaryPanel';
 import './App.css';
 
 export default function App() {
@@ -17,6 +18,7 @@ export default function App() {
   const [tags, setTags] = useState<Tag[]>([]);
   const [showReview, setShowReview] = useState(false);
   const [showTagPanel, setShowTagPanel] = useState(false);
+  const [showDictionary, setShowDictionary] = useState(false);
   const [editingNovelInfo, setEditingNovelInfo] = useState(false);
   const [mustEditJumpId, setMustEditJumpId] = useState<string | null>(null);
 
@@ -185,6 +187,7 @@ export default function App() {
         </div>
         <div className="header-actions">
           <span className="total-words">{totalWordCount} total words</span>
+          <button onClick={() => setShowDictionary(true)}>Dictionary</button>
           <button onClick={() => setShowTagPanel(true)}>Tags &amp; References</button>
           <button onClick={() => setShowReview(true)} disabled={!activeScene}>Review Checklist</button>
         </div>
@@ -278,6 +281,10 @@ export default function App() {
           onClose={() => setShowTagPanel(false)}
           onJumpToScene={(sceneId) => { setActiveSceneId(sceneId); setShowTagPanel(false); }}
         />
+      )}
+
+      {showDictionary && (
+        <DictionaryPanel onClose={() => setShowDictionary(false)} />
       )}
     </div>
   );

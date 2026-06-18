@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog, session } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog, session, Menu, MenuItem } from 'electron';
 import path from 'path';
 import fs from 'fs/promises';
 import { existsSync, mkdirSync } from 'fs';
@@ -28,6 +28,43 @@ function createWindow() {
   // Enable Electron's built-in spellchecker
   win.webContents.session.setSpellCheckerEnabled(true);
   win.webContents.session.setSpellCheckerLanguages(['en-US']);
+
+  // Custom right-click context menu: spelling suggestions, add-to-dictionary,
+  // and standard cut/copy/paste so we don't lose default behavior.
+  win.webContents.on('context-menu', (_event, params) => {
+    const menu = new Menu();
+
+    if (params.misspelledWord) {
+      for (const suggestion of params.dictionarySuggestions) {
+        menu.append(new MenuItem({
+          label: suggestion,
+          click: () => win.webContents.replaceMisspelling(suggestion),
+        }));
+      }
+      if (params.dictionarySuggestions.length > 0) {
+        menu.append(new MenuItem({ type: 'separator' }));
+      }
+      menu.append(new MenuItem({
+        label: `Add "${params.misspelledWord}" to Dictionary`,
+        click: () => win.webContents.session.addWordToSpellCheckerDictionary(params.misspelledWord),
+      }));
+      menu.append(new MenuItem({ type: 'separator' }));
+    }
+
+    if (params.editFlags.canCut) {
+      menu.append(new MenuItem({ label: 'Cut', role: 'cut', enabled: params.editFlags.canCut }));
+    }
+    if (params.editFlags.canCopy) {
+      menu.append(new MenuItem({ label: 'Copy', role: 'copy', enabled: params.editFlags.canCopy }));
+    }
+    if (params.editFlags.canPaste) {
+      menu.append(new MenuItem({ label: 'Paste', role: 'paste', enabled: params.editFlags.canPaste }));
+    }
+
+    if (menu.items.length > 0) {
+      menu.popup();
+    }
+  });
 
   if (isDev) {
     win.loadURL('http://localhost:5173');
@@ -132,6 +169,26 @@ ipcMain.handle('tags:save', async (_evt, novelId, tags) => {
   const tagsPath = path.join(NOVELS_ROOT, novelId, 'tags.json');
   await fs.writeFile(tagsPath, JSON.stringify(tags, null, 2));
   return tags;
+});
+
+// ---------- IPC: Spellchecker dictionary ----------
+
+ipcMain.handle('dictionary:list', async (event) => {
+  const win = BrowserWindow.fromWebContents(event.sender);
+  if (!win) return [];
+  return win.webContents.session.listWordsInSpellCheckerDictionary();
+});
+
+ipcMain.handle('dictionary:add', async (event, word: string) => {
+  const win = BrowserWindow.fromWebContents(event.sender);
+  if (!win) return false;
+  return win.webContents.session.addWordToSpellCheckerDictionary(word);
+});
+
+ipcMain.handle('dictionary:remove', async (event, word: string) => {
+  const win = BrowserWindow.fromWebContents(event.sender);
+  if (!win) return false;
+  return win.webContents.session.removeWordFromSpellCheckerDictionary(word);
 });
 
 // ---------- IPC: Misc ----------

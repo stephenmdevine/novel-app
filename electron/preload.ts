@@ -17,6 +17,11 @@ contextBridge.exposeInMainWorld('api', {
   listTags: (novelId: string) => ipcRenderer.invoke('tags:list', novelId),
   saveTags: (novelId: string, tags: any) => ipcRenderer.invoke('tags:save', novelId, tags),
 
+  // Dictionary
+  listDictionaryWords: () => ipcRenderer.invoke('dictionary:list'),
+  addDictionaryWord: (word: string) => ipcRenderer.invoke('dictionary:add', word),
+  removeDictionaryWord: (word: string) => ipcRenderer.invoke('dictionary:remove', word),
+
   // Misc
   getNovelsRoot: () => ipcRenderer.invoke('app:getNovelsRoot'),
   revealInFolder: (novelId: string) => ipcRenderer.invoke('app:revealInFolder', novelId),
