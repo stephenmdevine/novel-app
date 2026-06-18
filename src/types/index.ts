@@ -71,6 +71,7 @@ export interface Tag {
   name: string;
   type: TagType;
   attributes: Record<string, string>; // free-form key/value, e.g. { age: '34', role: 'protagonist' }
+  attributeScenes?: Record<string, string>; // attribute key -> sceneId where the fact was established
   color?: string;
 }
 

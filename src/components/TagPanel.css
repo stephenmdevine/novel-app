@@ -193,3 +193,182 @@
 .delete-tag-btn:hover {
   background: #5a3232;
 }
+
+/* Attribute row: stack main row and scene row vertically */
+.attribute-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+/* Main row: key label + value input + delete button */
+.attribute-main {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.attribute-value-input {
+  flex: 1;
+}
+
+.delete-attr-btn {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.delete-attr-btn:hover {
+  color: #e05c5c;
+  background: rgba(224, 92, 92, 0.12);
+}
+
+/* Scene attribution sub-row */
+.attribute-scene-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-left: 2px;
+}
+
+.attribute-scene-label {
+  font-size: 11px;
+  color: #888;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.attribute-scene-select {
+  font-size: 12px;
+  background: #1e1e2e;
+  color: #cdd6f4;
+  border: 1px solid #45475a;
+  border-radius: 4px;
+  padding: 2px 6px;
+  flex: 1;
+  min-width: 0;
+}
+.attribute-scene-select:focus {
+  outline: none;
+  border-color: #89b4fa;
+}
+
+/* Jump arrow button */
+.attribute-scene-jump {
+  background: none;
+  border: 1px solid #45475a;
+  border-radius: 4px;
+  color: #89b4fa;
+  font-size: 13px;
+  padding: 1px 7px;
+  cursor: pointer;
+  flex-shrink: 0;
+  line-height: 1.4;
+}
+.attribute-scene-jump:hover {
+  background: rgba(137, 180, 250, 0.12);
+  border-color: #89b4fa;
+}
+
+/* ---- Add these rules to your existing TagPanel.css ---- */
+
+/* Inline "add attribute" form */
+.new-attr-form {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.new-attr-input {
+  flex: 1;
+}
+
+
+/* Attribute row: stack main row and scene row vertically */
+.attribute-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+/* Main row: key label + value input + delete button */
+.attribute-main {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.attribute-value-input {
+  flex: 1;
+}
+
+.delete-attr-btn {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.delete-attr-btn:hover {
+  color: #e05c5c;
+  background: rgba(224, 92, 92, 0.12);
+}
+
+/* Scene attribution sub-row */
+.attribute-scene-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-left: 2px;
+}
+
+.attribute-scene-label {
+  font-size: 11px;
+  color: #888;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.attribute-scene-select {
+  font-size: 12px;
+  background: #1e1e2e;
+  color: #cdd6f4;
+  border: 1px solid #45475a;
+  border-radius: 4px;
+  padding: 2px 6px;
+  flex: 1;
+  min-width: 0;
+}
+.attribute-scene-select:focus {
+  outline: none;
+  border-color: #89b4fa;
+}
+
+/* Jump arrow button */
+.attribute-scene-jump {
+  background: none;
+  border: 1px solid #45475a;
+  border-radius: 4px;
+  color: #89b4fa;
+  font-size: 13px;
+  padding: 1px 7px;
+  cursor: pointer;
+  flex-shrink: 0;
+  line-height: 1.4;
+}
+.attribute-scene-jump:hover {
+  background: rgba(137, 180, 250, 0.12);
+  border-color: #89b4fa;
+}

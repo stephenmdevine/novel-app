@@ -13,6 +13,8 @@ interface TagPanelProps {
 
 export default function TagPanel({ tags, scenes, onUpdateTag, onDeleteTag, onClose, onJumpToScene }: TagPanelProps) {
   const [selectedTagId, setSelectedTagId] = useState<string | null>(tags[0]?.id ?? null);
+  const [addingAttr, setAddingAttr] = useState(false);
+  const [newAttrKey, setNewAttrKey] = useState('');
   const selectedTag = tags.find((t) => t.id === selectedTagId) ?? null;
 
   // Find scenes that reference this tag (by data-tag-id in content HTML)
@@ -30,11 +32,32 @@ export default function TagPanel({ tags, scenes, onUpdateTag, onDeleteTag, onClo
     onUpdateTag({ ...selectedTag, attributes: { ...selectedTag.attributes, [key]: value } });
   };
 
-  const addAttribute = () => {
+  const updateAttributeScene = (key: string, sceneId: string) => {
     if (!selectedTag) return;
-    const key = prompt('Attribute name (e.g. age, role, eye color):');
-    if (!key) return;
+    const attributeScenes = { ...(selectedTag.attributeScenes ?? {}) };
+    if (sceneId === '') {
+      delete attributeScenes[key];
+    } else {
+      attributeScenes[key] = sceneId;
+    }
+    onUpdateTag({ ...selectedTag, attributeScenes });
+  };
+
+  const deleteAttribute = (key: string) => {
+    if (!selectedTag) return;
+    const attributes = { ...selectedTag.attributes };
+    const attributeScenes = { ...(selectedTag.attributeScenes ?? {}) };
+    delete attributes[key];
+    delete attributeScenes[key];
+    onUpdateTag({ ...selectedTag, attributes, attributeScenes });
+  };
+
+  const commitAddAttribute = () => {
+    const key = newAttrKey.trim();
+    if (!key || !selectedTag) return;
     onUpdateTag({ ...selectedTag, attributes: { ...selectedTag.attributes, [key]: '' } });
+    setNewAttrKey('');
+    setAddingAttr(false);
   };
 
   return (
@@ -50,7 +73,7 @@ export default function TagPanel({ tags, scenes, onUpdateTag, onDeleteTag, onClo
               <div
                 key={tag.id}
                 className={`tag-list-item ${tag.id === selectedTagId ? 'active' : ''}`}
-                onClick={() => setSelectedTagId(tag.id)}
+                onClick={() => { setSelectedTagId(tag.id); setAddingAttr(false); setNewAttrKey(''); }}
               >
                 <span className={`tag-dot tag-${tag.type}`} /> {tag.name}
               </div>
@@ -86,17 +109,68 @@ export default function TagPanel({ tags, scenes, onUpdateTag, onDeleteTag, onClo
 
                 <label className="detail-label">Attributes</label>
                 <div className="attribute-list">
-                  {Object.entries(selectedTag.attributes).map(([key, value]) => (
-                    <div className="attribute-row" key={key}>
-                      <span className="attribute-key">{key}</span>
+                  {Object.entries(selectedTag.attributes).map(([key, value]) => {
+                    const pinnedSceneId = selectedTag.attributeScenes?.[key] ?? '';
+                    const pinnedScene = scenes.find((s) => s.id === pinnedSceneId) ?? null;
+                    return (
+                      <div className="attribute-row" key={key}>
+                        <div className="attribute-main">
+                          <span className="attribute-key">{key}</span>
+                          <input
+                            className="detail-input attribute-value-input"
+                            value={value}
+                            onChange={(e) => updateAttribute(key, e.target.value)}
+                          />
+                          <button
+                            className="delete-attr-btn"
+                            title="Remove attribute"
+                            onClick={() => deleteAttribute(key)}
+                          >×</button>
+                        </div>
+                        <div className="attribute-scene-row">
+                          <span className="attribute-scene-label">Established in:</span>
+                          <select
+                            className="attribute-scene-select"
+                            value={pinnedSceneId}
+                            onChange={(e) => updateAttributeScene(key, e.target.value)}
+                          >
+                            <option value="">— none —</option>
+                            {scenes.map((s) => (
+                              <option key={s.id} value={s.id}>{s.title}</option>
+                            ))}
+                          </select>
+                          {pinnedScene && (
+                            <button
+                              className="attribute-scene-jump"
+                              title={`Jump to ${pinnedScene.title}`}
+                              onClick={() => onJumpToScene(pinnedScene.id)}
+                            >
+                              ↗
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {addingAttr ? (
+                    <div className="new-attr-form">
                       <input
-                        className="detail-input"
-                        value={value}
-                        onChange={(e) => updateAttribute(key, e.target.value)}
+                        className="detail-input new-attr-input"
+                        value={newAttrKey}
+                        onChange={(e) => setNewAttrKey(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') commitAddAttribute();
+                          if (e.key === 'Escape') { setAddingAttr(false); setNewAttrKey(''); }
+                        }}
+                        placeholder="e.g. age, eye color, role…"
+                        autoFocus
                       />
+                      <button className="tag-form-submit" onClick={commitAddAttribute}>Add</button>
+                      <button className="tag-form-cancel" onClick={() => { setAddingAttr(false); setNewAttrKey(''); }}>Cancel</button>
                     </div>
-                  ))}
-                  <button className="add-attr-btn" onClick={addAttribute}>+ Add attribute</button>
+                  ) : (
+                    <button className="add-attr-btn" onClick={() => setAddingAttr(true)}>+ Add attribute</button>
+                  )}
                 </div>
 
                 <label className="detail-label">Referenced in {referencingScenes.length} scene(s)</label>
