@@ -93,3 +93,48 @@
   color: #777;
   padding: 10px 4px;
 }
+
+/* ---- Drag-to-reorder additions ---- */
+
+.scene-item {
+  transition: opacity 0.15s;
+}
+
+.scene-item.drag-over {
+  border-color: #5b8def;
+  box-shadow: 0 -3px 0 0 #5b8def;
+  background: #1e2a3d;
+}
+
+.scene-item[draggable='true']:active {
+  opacity: 0.5;
+}
+
+.scene-item-inner {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.drag-handle {
+  color: #555;
+  font-size: 16px;
+  cursor: grab;
+  flex-shrink: 0;
+  padding-top: 1px;
+  user-select: none;
+  line-height: 1;
+}
+
+.drag-handle:hover {
+  color: #888;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.scene-item-content {
+  flex: 1;
+  min-width: 0;
+}

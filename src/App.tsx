@@ -83,6 +83,14 @@ export default function App() {
     persistScene(sceneId, { title });
   };
 
+  const handleReorderScenes = async (reordered: Scene[]) => {
+    setScenes(reordered);
+    // Persist every scene whose order value changed
+    await Promise.all(
+      reordered.map((s) => window.api.saveScene(activeNovelId!, s))
+    );
+  };
+
   const handleEditorChange = (html: string, wordCount: number) => {
     if (!activeSceneId) return;
     setScenes((prev) =>
@@ -234,6 +242,7 @@ export default function App() {
           onAdd={handleAddScene}
           onDelete={handleDeleteScene}
           onRename={handleRenameScene}
+          onReorder={handleReorderScenes}
         />
 
         {activeScene ? (
