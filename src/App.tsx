@@ -34,6 +34,7 @@ export default function App() {
     window.api.listScenes(activeNovelId).then((s) => {
       setScenes(s);
       setActiveSceneId(s[0]?.id ?? null);
+      syncNovelStats(s);
     });
     window.api.listTags(activeNovelId).then(setTags);
   }, [activeNovelId]);
@@ -64,7 +65,11 @@ export default function App() {
     if (!activeNovelId) return;
     const scene = createEmptyScene(scenes.length);
     await window.api.saveScene(activeNovelId, scene);
-    setScenes((prev) => [...prev, scene]);
+    setScenes((prev) => {
+      const updated = [...prev, scene];
+      syncNovelStats(updated);
+      return updated;
+    });
     setActiveSceneId(scene.id);
   };
 
@@ -72,7 +77,11 @@ export default function App() {
     if (!activeNovelId) return;
     if (!confirm('Delete this scene?')) return;
     await window.api.deleteScene(activeNovelId, sceneId);
-    setScenes((prev) => prev.filter((s) => s.id !== sceneId));
+    setScenes((prev) => {
+      const updated = prev.filter((s) => s.id !== sceneId);
+      syncNovelStats(updated);
+      return updated;
+    });
     if (activeSceneId === sceneId) {
       setActiveSceneId(scenes.find((s) => s.id !== sceneId)?.id ?? null);
     }
@@ -85,7 +94,7 @@ export default function App() {
 
   const handleReorderScenes = async (reordered: Scene[]) => {
     setScenes(reordered);
-    // Persist every scene whose order value changed
+    syncNovelStats(reordered);
     await Promise.all(
       reordered.map((s) => window.api.saveScene(activeNovelId!, s))
     );
@@ -93,9 +102,11 @@ export default function App() {
 
   const handleEditorChange = (html: string, wordCount: number) => {
     if (!activeSceneId) return;
-    setScenes((prev) =>
-      prev.map((s) => (s.id === activeSceneId ? { ...s, content: html, wordCount } : s))
-    );
+    setScenes((prev) => {
+      const updated = prev.map((s) => (s.id === activeSceneId ? { ...s, content: html, wordCount } : s));
+      syncNovelStats(updated);
+      return updated;
+    });
     persistScene(activeSceneId, { content: html, wordCount });
   };
 
@@ -135,6 +146,17 @@ export default function App() {
       t.mustEditMarkerId === markerId ? { ...t, done: true } : t
     );
     handleTodosChange(todos);
+  };
+
+  const syncNovelStats = (currentScenes: Scene[]) => {
+    if (!activeNovel) return;
+    const totalWordCount = currentScenes.reduce((sum, s) => sum + s.wordCount, 0);
+    const sceneCount = currentScenes.length;
+    // Only write if values actually changed to avoid unnecessary disk writes
+    if (activeNovel.totalWordCount === totalWordCount && activeNovel.sceneCount === sceneCount) return;
+    const updated = { ...activeNovel, totalWordCount, sceneCount };
+    setNovels((prev) => prev.map((n) => (n.id === updated.id ? updated : n)));
+    window.api.saveNovel(updated);
   };
 
   const persistScene = async (sceneId: string, updates: Partial<Scene>) => {

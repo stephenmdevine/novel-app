@@ -14,6 +14,9 @@ export interface Novel {
   updatedAt: string;
   // Editable list of checklist items used for the post-draft review
   reviewChecklist: ChecklistItem[];
+  // Cached summary stats — updated whenever scenes are saved
+  totalWordCount?: number;
+  sceneCount?: number;
 }
 
 // The 6 fundamental scene-planning elements.

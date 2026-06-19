@@ -49,6 +49,11 @@ export default function NovelLibrary({ novels, onOpen, onCreate, onDelete }: Nov
             <h2>{novel.title}</h2>
             <div className="novel-genres">{novel.genres.join(' / ') || 'No genre set'}</div>
             <div className="novel-theme">{novel.theme || 'No theme set'}</div>
+            <div className="novel-stats">
+              <span>{novel.sceneCount ?? 0} {novel.sceneCount === 1 ? 'scene' : 'scenes'}</span>
+              <span className="novel-stats-divider">·</span>
+              <span>{(novel.totalWordCount ?? 0).toLocaleString()} words</span>
+            </div>
             <button
               className="delete-novel-btn"
               onClick={(e) => { e.stopPropagation(); onDelete(novel.id); }}
