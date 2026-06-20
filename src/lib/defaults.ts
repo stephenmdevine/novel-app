@@ -48,6 +48,14 @@ export function createEmptyScene(order: number): Scene {
     },
     reviewState: {},
     todos: [],
+    storyGrid: {
+      valueStart: '',
+      valueEnd: '',
+      polarity: '',
+      povCharacter: '',
+      sceneLocation: '',
+      turningPointType: '',
+    },
     createdAt: now,
     updatedAt: now,
   };

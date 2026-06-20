@@ -116,6 +116,12 @@ export default function App() {
     persistScene(activeSceneId, { elements });
   };
 
+  const handleStoryGridChange = (storyGrid: Scene['storyGrid']) => {
+    if (!activeSceneId) return;
+    setScenes((prev) => prev.map((s) => (s.id === activeSceneId ? { ...s, storyGrid } : s)));
+    persistScene(activeSceneId, { storyGrid });
+  };
+
   const handleReviewStateChange = (reviewState: Record<string, boolean>) => {
     if (!activeSceneId) return;
     setScenes((prev) => prev.map((s) => (s.id === activeSceneId ? { ...s, reviewState } : s)));
@@ -286,6 +292,7 @@ export default function App() {
               scene={activeScene}
               onElementsChange={handleElementsChange}
               onTodosChange={handleTodosChange}
+              onStoryGridChange={handleStoryGridChange}
               onJumpToMarker={(id) => setMustEditJumpId(id)}
             />
           </>

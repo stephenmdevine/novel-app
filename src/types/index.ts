@@ -40,6 +40,15 @@ export const DEFAULT_SCENE_ELEMENT_LABELS: Record<keyof SceneElements, string> =
   outcomeHook: 'Resolution',
 };
 
+export interface StoryGridData {
+  valueStart: string;       // free text — value at scene open, e.g. "Alive"
+  valueEnd: string;         // free text — value at scene close, e.g. "Unconscious"
+  polarity: '' | '+/-' | '-/+' | '+/++' | '-/--';
+  povCharacter: string;     // free text — POV character name
+  sceneLocation: string;    // free text — where the scene takes place
+  turningPointType: '' | 'active' | 'revelatory';
+}
+
 export interface TodoItem {
   id: string;
   label: string;
@@ -61,6 +70,7 @@ export interface Scene {
   elements: SceneElements;
   reviewState: Record<string, boolean>; // checklist item id -> completed
   todos: TodoItem[];
+  storyGrid?: StoryGridData;
   createdAt: string;
   updatedAt: string;
 }
