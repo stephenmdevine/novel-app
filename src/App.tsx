@@ -8,6 +8,7 @@ import SceneEditor from './components/SceneEditor';
 import ReviewChecklist from './components/ReviewChecklist';
 import TagPanel from './components/TagPanel';
 import DictionaryPanel from './components/DictionaryPanel';
+import StoryMapPanel from './components/StoryMapPanel';
 import './App.css';
 
 export default function App() {
@@ -19,8 +20,11 @@ export default function App() {
   const [showReview, setShowReview] = useState(false);
   const [showTagPanel, setShowTagPanel] = useState(false);
   const [showDictionary, setShowDictionary] = useState(false);
+  const [showStoryMap, setShowStoryMap] = useState(false);
   const [editingNovelInfo, setEditingNovelInfo] = useState(false);
   const [mustEditJumpId, setMustEditJumpId] = useState<string | null>(null);
+  const [planJumpKey, setPlanJumpKey] = useState<string | null>(null);
+  const [planAnchorKeys, setPlanAnchorKeys] = useState<Set<string>>(new Set());
 
   const activeNovel = novels.find((n) => n.id === activeNovelId) ?? null;
   const activeScene = scenes.find((s) => s.id === activeSceneId) ?? null;
@@ -35,6 +39,7 @@ export default function App() {
       setScenes(s);
       setActiveSceneId(s[0]?.id ?? null);
       syncNovelStats(s);
+      setPlanAnchorKeys(new Set());
     });
     window.api.listTags(activeNovelId).then(setTags);
   }, [activeNovelId]);
@@ -225,6 +230,7 @@ export default function App() {
           <span className="total-words">{totalWordCount} total words</span>
           <button onClick={() => setShowDictionary(true)}>Dictionary</button>
           <button onClick={() => setShowTagPanel(true)}>Tags &amp; References</button>
+          <button onClick={() => setShowStoryMap(true)}>Story Map</button>
           <button onClick={() => setShowReview(true)} disabled={!activeScene}>Review Checklist</button>
         </div>
       </header>
@@ -283,23 +289,36 @@ export default function App() {
                 onCreateTag={handleCreateTag}
                 onAddMustEdit={handleAddMustEdit}
                 onResolveMustEdit={handleResolveMustEdit}
+                onPlanAnchorsChange={setPlanAnchorKeys}
                 mustEditJumpId={mustEditJumpId}
                 onJumpHandled={() => setMustEditJumpId(null)}
+                planJumpKey={planJumpKey}
+                onPlanJumpHandled={() => setPlanJumpKey(null)}
               />
             </div>
             <SceneSidebar
               novel={activeNovel}
               scene={activeScene}
+              planAnchorKeys={planAnchorKeys}
               onElementsChange={handleElementsChange}
               onTodosChange={handleTodosChange}
               onStoryGridChange={handleStoryGridChange}
               onJumpToMarker={(id) => setMustEditJumpId(id)}
+              onJumpToPlanMark={(key) => setPlanJumpKey(key)}
             />
           </>
         ) : (
           <div className="no-scene">Select or create a scene to begin writing.</div>
         )}
       </div>
+
+      {showStoryMap && (
+        <StoryMapPanel
+          scenes={scenes}
+          onJumpToScene={(id) => { setActiveSceneId(id); setShowStoryMap(false); }}
+          onClose={() => setShowStoryMap(false)}
+        />
+      )}
 
       {showReview && activeScene && (
         <ReviewChecklist

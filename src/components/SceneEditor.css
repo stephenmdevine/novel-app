@@ -266,3 +266,47 @@
 .tag-location { background: #4caf50; }
 .tag-item { background: #ffb74d; }
 .tag-other { background: #b39ddb; }
+
+/* ---- Scene Plan mark highlights ---- */
+/* Top border distinguishes from entity-tag and must-edit (both use bottom border) */
+.scene-plan-mark {
+  background: color-mix(in srgb, var(--plan-color) 12%, transparent);
+  border-top: 2px solid var(--plan-color);
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+/* ---- Plan Anchor toolbar controls ---- */
+.plan-anchor-btn {
+  background: #1a2a1a !important;
+  border: 1px solid #2d5a2d !important;
+  color: #7ecf9e !important;
+}
+
+.plan-anchor-btn.active,
+.plan-anchor-btn:hover {
+  background: #213021 !important;
+}
+
+.plan-remove-btn {
+  background: #2a1a2a !important;
+  border: 1px solid #5a2d5a !important;
+  color: #cf9edf !important;
+  font-size: 12px !important;
+}
+
+.plan-remove-btn:hover {
+  background: #321f32 !important;
+}
+
+.plan-anchor-menu {
+  min-width: 210px;
+}
+
+.plan-anchor-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}

@@ -5,9 +5,12 @@ import { useEffect, useRef, useState } from 'react';
 import { EntityTag } from '../lib/EntityTag';
 import { MustEdit } from '../lib/MustEdit';
 import { FindHighlight, findHighlightKey } from '../lib/FindHighlight';
+import { ScenePlanMark, PLAN_ELEMENT_COLORS, getAnchoredPlanKeys } from '../lib/ScenePlanMark';
 import { useFindReplace } from '../lib/useFindReplace';
 import FindReplaceBar from './FindReplaceBar';
 import type { Tag, Scene } from '../types';
+import { DEFAULT_SCENE_ELEMENT_LABELS } from '../types';
+import type { SceneElements } from '../types';
 import './SceneEditor.css';
 
 interface SceneEditorProps {
@@ -17,8 +20,11 @@ interface SceneEditorProps {
   onCreateTag: (name: string, type: Tag['type']) => Tag;
   onAddMustEdit: (markerId: string, note: string, selectedText: string) => void;
   onResolveMustEdit: (markerId: string) => void;
+  onPlanAnchorsChange: (keys: Set<string>) => void;
   mustEditJumpId: string | null;
   onJumpHandled: () => void;
+  planJumpKey: string | null;
+  onPlanJumpHandled: () => void;
 }
 
 type TagMenuState = 'closed' | 'list' | 'new';
@@ -31,11 +37,15 @@ export default function SceneEditor({
   onCreateTag,
   onAddMustEdit,
   onResolveMustEdit,
+  onPlanAnchorsChange,
   mustEditJumpId,
   onJumpHandled,
+  planJumpKey,
+  onPlanJumpHandled,
 }: SceneEditorProps) {
   const [tagMenu, setTagMenu] = useState<TagMenuState>('closed');
   const [mustEditMenu, setMustEditMenu] = useState<MustEditMenuState>('closed');
+  const [planMenuOpen, setPlanMenuOpen] = useState(false);
   const [newTagName, setNewTagName] = useState('');
   const [newTagType, setNewTagType] = useState<Tag['type']>('character');
   const [mustEditNote, setMustEditNote] = useState('');
@@ -57,12 +67,15 @@ export default function SceneEditor({
       EntityTag,
       MustEdit,
       FindHighlight,
+      ScenePlanMark,
     ],
     content: scene.content || '<p></p>',
     onUpdate: ({ editor }) => {
       const html = editor.getHTML();
       const words = editor.storage.characterCount.words();
       onChange(html, words);
+      // Report which plan element keys currently have anchors
+      onPlanAnchorsChange(getAnchoredPlanKeys(editor.state.doc));
     },
   });
 
@@ -94,6 +107,8 @@ export default function SceneEditor({
   useEffect(() => {
     if (editor && editor.getHTML() !== scene.content) {
       editor.commands.setContent(scene.content || '<p></p>');
+      // Report anchors for newly loaded scene
+      onPlanAnchorsChange(getAnchoredPlanKeys(editor.state.doc));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scene.id]);
@@ -125,6 +140,25 @@ export default function SceneEditor({
     onJumpHandled();
   }, [mustEditJumpId]);
 
+  // Jump to a scene plan anchor when clicked from sidebar
+  useEffect(() => {
+    if (!planJumpKey || !editor) return;
+    const { doc } = editor.state;
+    let found = false;
+    doc.descendants((node, pos) => {
+      if (found) return false;
+      node.marks.forEach((mark) => {
+        if (mark.type.name === 'scenePlan' && mark.attrs.elementKey === planJumpKey) {
+          editor.commands.setTextSelection({ from: pos, to: pos + node.nodeSize });
+          editor.commands.focus();
+          found = true;
+        }
+      });
+    });
+    if (!found) showToast('No text anchored to that plan element yet.');
+    onPlanJumpHandled();
+  }, [planJumpKey]);
+
   if (!editor) return null;
 
   // ---- Tag handlers ----
@@ -132,6 +166,7 @@ export default function SceneEditor({
   const handleTagButtonMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
     setMustEditMenu('closed');
+    setPlanMenuOpen(false);
     if (tagMenu !== 'closed') { setTagMenu('closed'); return; }
     const { from, to } = editor.state.selection;
     if (from === to) { showToast('Select some text first, then click "Tag Selection".'); editor.commands.focus(); return; }
@@ -161,6 +196,7 @@ export default function SceneEditor({
   const handleMustEditMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
     setTagMenu('closed');
+    setPlanMenuOpen(false);
     if (mustEditMenu !== 'closed') { setMustEditMenu('closed'); return; }
     const { from, to } = editor.state.selection;
     if (from === to) { showToast('Select the text you want to mark first.'); editor.commands.focus(); return; }
@@ -183,7 +219,6 @@ export default function SceneEditor({
   };
 
   const handleResolveMustEdit = () => {
-    // Check if the cursor is inside a must-edit mark
     const { from } = editor.state.selection;
     const resolvedMarks: string[] = [];
     editor.state.doc.descendants((node, pos) => {
@@ -206,6 +241,47 @@ export default function SceneEditor({
       (editor.commands as any).unsetMustEdit(id);
       onResolveMustEdit(id);
     });
+  };
+
+  // ---- Scene Plan anchor handlers ----
+
+  const handlePlanMenuMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setTagMenu('closed');
+    setMustEditMenu('closed');
+    if (planMenuOpen) { setPlanMenuOpen(false); return; }
+    const { from, to } = editor.state.selection;
+    if (from === to) {
+      showToast('Select the passage you want to anchor first.');
+      editor.commands.focus();
+      return;
+    }
+    savedSelection.current = { from, to };
+    setPlanMenuOpen(true);
+  };
+
+  const applyPlanMark = (elementKey: string) => {
+    if (!savedSelection.current) return;
+    const { from, to } = savedSelection.current;
+    editor
+      .chain()
+      .focus()
+      .setTextSelection({ from, to })
+      .setScenePlanMark(elementKey)
+      .run();
+    onPlanAnchorsChange(getAnchoredPlanKeys(editor.state.doc));
+    savedSelection.current = null;
+    setPlanMenuOpen(false);
+  };
+
+  const handleRemovePlanMarkMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const removed = (editor.commands as any).unsetScenePlanMarkAtCursor();
+    if (!removed) {
+      showToast('Place your cursor inside a plan-anchored passage first.');
+    }
+    onPlanAnchorsChange(getAnchoredPlanKeys(editor.state.doc));
+    editor.commands.focus();
   };
 
   const words = editor.storage.characterCount.words();
@@ -327,6 +403,50 @@ export default function SceneEditor({
         >
           ✓ Resolve
         </button>
+
+        <div className="toolbar-divider" />
+
+        {/* Scene Plan anchor */}
+        <div className="tag-control">
+          <button
+            onMouseDown={handlePlanMenuMouseDown}
+            className={`plan-anchor-btn ${planMenuOpen ? 'active' : ''}`}
+            title="Select text, then anchor it to a Scene Plan element"
+          >
+            ¶ Anchor to Plan
+          </button>
+
+          {planMenuOpen && (
+            <div className="tag-menu plan-anchor-menu">
+              <div className="tag-menu-empty" style={{ paddingBottom: 4 }}>
+                Anchor selection as…
+              </div>
+              {(Object.keys(DEFAULT_SCENE_ELEMENT_LABELS) as Array<keyof SceneElements>).map((key) => (
+                <div
+                  key={key}
+                  className="tag-menu-item"
+                  onMouseDown={(e) => { e.preventDefault(); applyPlanMark(key); }}
+                >
+                  <span
+                    className="plan-anchor-dot"
+                    style={{ background: PLAN_ELEMENT_COLORS[key] }}
+                  />
+                  {DEFAULT_SCENE_ELEMENT_LABELS[key]}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <button
+          onMouseDown={handleRemovePlanMarkMouseDown}
+          className="plan-remove-btn"
+          title="Place cursor inside an anchored passage to remove its plan anchor"
+        >
+          Remove Anchor
+        </button>
+
+        <div className="toolbar-divider" />
 
         <button
           onMouseDown={(e) => { e.preventDefault(); setFindOpen((o) => !o); }}

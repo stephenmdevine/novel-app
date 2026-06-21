@@ -1,16 +1,19 @@
 import { useState } from 'react';
 import type { Novel, Scene, SceneElements, TodoItem, StoryGridData } from '../types';
 import { DEFAULT_SCENE_ELEMENT_LABELS } from '../types';
+import { PLAN_ELEMENT_COLORS } from '../lib/ScenePlanMark';
 import SceneTodoList from './SceneTodoList';
 import './SceneSidebar.css';
 
 interface SceneSidebarProps {
   novel: Novel;
   scene: Scene;
+  planAnchorKeys: Set<string>;
   onElementsChange: (elements: SceneElements) => void;
   onTodosChange: (todos: TodoItem[]) => void;
   onStoryGridChange: (storyGrid: StoryGridData) => void;
   onJumpToMarker: (markerId: string) => void;
+  onJumpToPlanMark: (elementKey: string) => void;
 }
 
 type SidebarTab = 'plan' | 'grid';
@@ -29,13 +32,18 @@ const TURNING_POINT_OPTIONS: { value: StoryGridData['turningPointType']; label: 
   { value: 'revelatory', label: 'Revelatory' },
 ];
 
+// The Scene Plan key that corresponds to "Turning Point" in the user's labeling
+const TURNING_POINT_PLAN_KEY = 'incitingIncident';
+
 export default function SceneSidebar({
   novel,
   scene,
+  planAnchorKeys,
   onElementsChange,
   onTodosChange,
   onStoryGridChange,
   onJumpToMarker,
+  onJumpToPlanMark,
 }: SceneSidebarProps) {
   const [tab, setTab] = useState<SidebarTab>('plan');
 
@@ -51,6 +59,8 @@ export default function SceneSidebar({
   const updateGrid = (key: keyof StoryGridData, value: string) => {
     onStoryGridChange({ ...grid, [key]: value });
   };
+
+  const turningPointAnchored = planAnchorKeys.has(TURNING_POINT_PLAN_KEY);
 
   return (
     <div className="scene-sidebar">
@@ -87,17 +97,40 @@ export default function SceneSidebar({
 
           <div className="sidebar-section">
             <h3>Scene Plan</h3>
-            {(Object.keys(DEFAULT_SCENE_ELEMENT_LABELS) as Array<keyof SceneElements>).map((key) => (
-              <div className="element-field" key={key}>
-                <label>{DEFAULT_SCENE_ELEMENT_LABELS[key]}</label>
-                <textarea
-                  value={scene.elements[key]}
-                  onChange={(e) => updateElement(key, e.target.value)}
-                  placeholder={`Describe the ${DEFAULT_SCENE_ELEMENT_LABELS[key].toLowerCase()}...`}
-                  rows={2}
-                />
-              </div>
-            ))}
+            {(Object.keys(DEFAULT_SCENE_ELEMENT_LABELS) as Array<keyof SceneElements>).map((key) => {
+              const label = DEFAULT_SCENE_ELEMENT_LABELS[key];
+              const color = PLAN_ELEMENT_COLORS[key];
+              const anchored = planAnchorKeys.has(key);
+              return (
+                <div className="element-field" key={key}>
+                  <div className="element-label-row">
+                    <span
+                      className="plan-element-swatch"
+                      style={{ background: color }}
+                      title={`${label} anchor color`}
+                    />
+                    {anchored ? (
+                      <button
+                        className="element-label-btn"
+                        style={{ color }}
+                        onClick={() => onJumpToPlanMark(key)}
+                        title={`Jump to anchored ${label} text`}
+                      >
+                        {label} ↗
+                      </button>
+                    ) : (
+                      <label className="element-label-plain">{label}</label>
+                    )}
+                  </div>
+                  <textarea
+                    value={scene.elements[key]}
+                    onChange={(e) => updateElement(key, e.target.value)}
+                    placeholder={`Notes on the ${label.toLowerCase()}…`}
+                    rows={2}
+                  />
+                </div>
+              );
+            })}
           </div>
         </>
       )}
@@ -128,7 +161,9 @@ export default function SceneSidebar({
             </div>
             {grid.valueStart && grid.valueEnd && (
               <div className="value-shift-preview">
-                {grid.valueStart} <span className="value-shift-arrow">→</span> {grid.valueEnd}
+                {grid.valueStart}
+                <span className="value-shift-arrow">→</span>
+                {grid.valueEnd}
               </div>
             )}
           </div>
@@ -147,7 +182,22 @@ export default function SceneSidebar({
           </div>
 
           <div className="element-field">
-            <label>Turning Point</label>
+            <div className="element-label-row" style={{ marginBottom: 4 }}>
+              <span
+                className="plan-element-swatch"
+                style={{ background: PLAN_ELEMENT_COLORS[TURNING_POINT_PLAN_KEY] }}
+              />
+              <label style={{ margin: 0 }}>Turning Point</label>
+              {turningPointAnchored && (
+                <button
+                  className="grid-jump-link"
+                  onClick={() => onJumpToPlanMark(TURNING_POINT_PLAN_KEY)}
+                  title="Jump to anchored Turning Point text"
+                >
+                  ↗ in scene
+                </button>
+              )}
+            </div>
             <select
               className="grid-select"
               value={grid.turningPointType}
