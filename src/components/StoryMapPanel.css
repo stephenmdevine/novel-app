@@ -152,14 +152,16 @@
 }
 
 /* Column widths */
-.col-num    { width: 36px; }
-.col-title  { min-width: 140px; }
-.col-pov    { min-width: 100px; }
-.col-loc    { min-width: 110px; }
-.col-value  { min-width: 160px; }
+.col-num      { width: 36px; }
+.col-title    { min-width: 140px; }
+.col-pov      { min-width: 100px; }
+.col-loc      { min-width: 110px; }
+.col-period   { min-width: 110px; }
+.col-duration { min-width: 90px; }
+.col-value    { min-width: 160px; }
 .col-polarity { min-width: 110px; }
-.col-tp     { min-width: 100px; }
-.col-status { width: 28px; text-align: center; }
+.col-tp       { min-width: 100px; }
+.col-status   { width: 28px; text-align: center; }
 
 .cell-muted {
   color: #666;

@@ -24,11 +24,11 @@ const TURNING_POINT_LABELS: Record<string, string> = {
 };
 
 function emptyGrid(): StoryGridData {
-  return { valueStart: '', valueEnd: '', polarity: '', povCharacter: '', sceneLocation: '', turningPointType: '' };
+  return { valueStart: '', valueEnd: '', polarity: '', povCharacter: '', sceneLocation: '', period: '', duration: '', turningPointType: '' };
 }
 
 function completeness(g: StoryGridData): 'full' | 'partial' | 'empty' {
-  const fields = [g.valueStart, g.valueEnd, g.polarity, g.povCharacter, g.sceneLocation, g.turningPointType];
+  const fields = [g.valueStart, g.valueEnd, g.polarity, g.povCharacter, g.sceneLocation, g.period, g.duration, g.turningPointType];
   const filled = fields.filter(Boolean).length;
   if (filled === 0) return 'empty';
   if (filled === fields.length) return 'full';
@@ -50,6 +50,8 @@ function GridTable({ scenes, onJumpToScene }: { scenes: Scene[]; onJumpToScene: 
             <th className="col-title">Scene</th>
             <th className="col-pov">POV</th>
             <th className="col-loc">Location</th>
+            <th className="col-period">Period</th>
+            <th className="col-duration">Duration</th>
             <th className="col-value">Value Shift</th>
             <th className="col-polarity">Polarity</th>
             <th className="col-tp">Turning Point</th>
@@ -72,6 +74,8 @@ function GridTable({ scenes, onJumpToScene }: { scenes: Scene[]; onJumpToScene: 
                 <td className="col-title cell-title">{scene.title}</td>
                 <td className="col-pov">{g.povCharacter || <span className="cell-empty">—</span>}</td>
                 <td className="col-loc">{g.sceneLocation || <span className="cell-empty">—</span>}</td>
+                <td className="col-period">{g.period || <span className="cell-empty">—</span>}</td>
+                <td className="col-duration">{g.duration || <span className="cell-empty">—</span>}</td>
                 <td className="col-value">
                   {g.valueStart || g.valueEnd ? (
                     <span className="value-shift-cell">

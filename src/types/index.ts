@@ -46,6 +46,8 @@ export interface StoryGridData {
   polarity: '' | '+/-' | '-/+' | '+/++' | '-/--';
   povCharacter: string;     // free text — POV character name
   sceneLocation: string;    // free text — where the scene takes place
+  period: string;           // free text — when the scene takes place, e.g. "Dawn, Day 3"
+  duration: string;         // free text — how long the scene spans, e.g. "~20 minutes"
   turningPointType: '' | 'active' | 'revelatory';
 }
 

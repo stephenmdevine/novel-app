@@ -54,6 +54,8 @@ export function createEmptyScene(order: number): Scene {
       polarity: '',
       povCharacter: '',
       sceneLocation: '',
+      period: '',
+      duration: '',
       turningPointType: '',
     },
     createdAt: now,

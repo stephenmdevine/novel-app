@@ -53,7 +53,7 @@ export default function SceneSidebar({
 
   const grid: StoryGridData = scene.storyGrid ?? {
     valueStart: '', valueEnd: '', polarity: '',
-    povCharacter: '', sceneLocation: '', turningPointType: '',
+    povCharacter: '', sceneLocation: '', period: '', duration: '', turningPointType: '',
   };
 
   const updateGrid = (key: keyof StoryGridData, value: string) => {
@@ -226,6 +226,26 @@ export default function SceneSidebar({
               value={grid.sceneLocation}
               onChange={(e) => updateGrid('sceneLocation', e.target.value)}
               placeholder="Where does this scene take place?"
+            />
+          </div>
+
+          <div className="element-field">
+            <label>Period / Time</label>
+            <input
+              className="grid-text-input"
+              value={grid.period}
+              onChange={(e) => updateGrid('period', e.target.value)}
+              placeholder="e.g. Dawn, Day 3 · Winter 1842…"
+            />
+          </div>
+
+          <div className="element-field">
+            <label>Duration</label>
+            <input
+              className="grid-text-input"
+              value={grid.duration}
+              onChange={(e) => updateGrid('duration', e.target.value)}
+              placeholder="e.g. ~20 minutes · 3 days…"
             />
           </div>
         </div>
