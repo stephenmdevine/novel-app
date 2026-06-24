@@ -56,7 +56,19 @@
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: #888;
+  margin: 0 0 6px 0;
+}
+
+.sidebar-hint {
+  font-size: 11px;
+  color: #666;
+  line-height: 1.5;
   margin: 0 0 10px 0;
+}
+
+.sidebar-hint strong {
+  color: #888;
+  font-weight: 600;
 }
 
 .context-row {

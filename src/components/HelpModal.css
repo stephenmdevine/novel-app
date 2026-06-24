@@ -1,0 +1,167 @@
+/* ============================================================
+   HelpModal
+   ============================================================ */
+
+.help-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 200;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 24px;
+  box-sizing: border-box;
+}
+
+.help-panel {
+  background: #1e1e1e;
+  border: 1px solid #3a3a3a;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 680px;
+  max-height: calc(100vh - 80px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+/* ---- Header ---- */
+.help-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 14px;
+  border-bottom: 1px solid #3a3a3a;
+  flex-shrink: 0;
+}
+
+.help-header h2 {
+  margin: 0;
+  font-size: 17px;
+  color: #eee;
+}
+
+.help-close {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+
+.help-close:hover {
+  color: #eee;
+}
+
+/* ---- Tabs ---- */
+.help-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  border-bottom: 1px solid #3a3a3a;
+  padding: 0 20px;
+  flex-shrink: 0;
+}
+
+.help-tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #777;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 8px 12px 9px;
+  cursor: pointer;
+  margin-bottom: -1px;
+  transition: color 0.15s, border-color 0.15s;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.help-tab:hover {
+  color: #bbb;
+}
+
+.help-tab.active {
+  color: #aac4ff;
+  border-bottom-color: #aac4ff;
+}
+
+/* ---- Body ---- */
+.help-body {
+  overflow-y: auto;
+  flex: 1;
+  padding: 20px 24px 28px;
+}
+
+.help-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.help-intro {
+  font-size: 13px;
+  color: #aaa;
+  margin: 0 0 16px 0;
+  line-height: 1.6;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #2e2e2e;
+}
+
+.help-section ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.help-section li {
+  font-size: 13px;
+  color: #ccc;
+  line-height: 1.6;
+  padding-left: 14px;
+  position: relative;
+}
+
+.help-section li::before {
+  content: '·';
+  position: absolute;
+  left: 0;
+  color: #555;
+}
+
+.help-section li strong {
+  color: #eee;
+}
+
+/* Inline code / monospace snippets */
+.help-mono {
+  font-family: 'Menlo', 'Consolas', monospace;
+  font-size: 11px;
+  background: #2a2a2a;
+  border: 1px solid #3a3a3a;
+  border-radius: 3px;
+  padding: 1px 5px;
+  color: #aac4ff;
+}
+
+/* Keyboard keys */
+kbd {
+  font-family: 'Menlo', 'Consolas', monospace;
+  font-size: 11px;
+  background: #2a2a2a;
+  border: 1px solid #444;
+  border-bottom-width: 2px;
+  border-radius: 3px;
+  padding: 1px 5px;
+  color: #ddd;
+}

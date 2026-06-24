@@ -137,3 +137,12 @@
   outline: 2px solid #fff;
   outline-offset: 2px;
 }
+
+/* Intro hint below the progress bar */
+.review-intro {
+  font-size: 12px;
+  color: #777;
+  margin: 0 0 16px 0;
+  line-height: 1.5;
+  padding: 0 20px;
+}

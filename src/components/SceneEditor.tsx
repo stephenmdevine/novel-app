@@ -311,6 +311,7 @@ export default function SceneEditor({
           <button
             onMouseDown={handleTagButtonMouseDown}
             className={tagMenu !== 'closed' ? 'active' : ''}
+            title="Select text in the editor, then click to tag it as a character, location, item, or other entity"
           >Tag Selection</button>
 
           {tagMenu === 'list' && (
@@ -359,7 +360,10 @@ export default function SceneEditor({
           )}
         </div>
 
-        <button onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().unsetEntityTag().run(); }}>
+        <button
+          onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().unsetEntityTag().run(); }}
+          title="Place your cursor inside tagged text, then click to remove the tag"
+        >
           Remove Tag
         </button>
 
@@ -370,6 +374,7 @@ export default function SceneEditor({
           <button
             onMouseDown={handleMustEditMouseDown}
             className={`must-edit-btn ${mustEditMenu !== 'closed' ? 'active' : ''}`}
+            title="Select the text that needs revision, then click to mark it and create a linked to-do"
           >✎ Must Edit</button>
 
           {mustEditMenu === 'form' && (

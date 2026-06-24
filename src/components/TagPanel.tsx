@@ -108,6 +108,9 @@ export default function TagPanel({ tags, scenes, onUpdateTag, onDeleteTag, onClo
                 </select>
 
                 <label className="detail-label">Attributes</label>
+                <div className="detail-hint">
+                  Record key facts about this entity — age, role, appearance, etc. Pin each attribute to the scene where that fact was established to create a jump link back to the source.
+                </div>
                 <div className="attribute-list">
                   {Object.entries(selectedTag.attributes).map(([key, value]) => {
                     const pinnedSceneId = selectedTag.attributeScenes?.[key] ?? '';

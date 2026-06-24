@@ -138,3 +138,28 @@ body, html, #root {
   color: #888;
   font-size: 14px;
 }
+
+/* Help button in the header — circular, subtle */
+.help-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #2a2a2a;
+  border: 1px solid #444;
+  color: #888;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+}
+
+.help-btn:hover {
+  background: #3a3a3a;
+  color: #eee;
+}

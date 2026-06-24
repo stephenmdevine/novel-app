@@ -39,6 +39,10 @@ export default function ReviewChecklist({ novel, scene, onUpdateReviewState, onC
           </div>
         </div>
 
+        <p className="review-intro">
+          Work through each item and check it off when satisfied. Click the dots at the bottom to jump to any item directly.
+        </p>
+
         <div className="review-step">
           <div className="step-counter">Item {index + 1} of {items.length}</div>
           <div className="step-question">{current.label}</div>

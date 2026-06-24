@@ -38,7 +38,22 @@ function completeness(g: StoryGridData): 'full' | 'partial' | 'empty' {
 // ---- Table view ----
 function GridTable({ scenes, onJumpToScene }: { scenes: Scene[]; onJumpToScene: (id: string) => void }) {
   if (scenes.length === 0) {
-    return <div className="story-map-empty">No scenes yet.</div>;
+    return (
+      <div className="story-map-empty">
+        No scenes yet. Open a novel and add scenes to begin building your Story Map.
+      </div>
+    );
+  }
+
+  const hasAnyData = scenes.some((s) => s.storyGrid && Object.values(s.storyGrid).some(Boolean));
+  if (!hasAnyData) {
+    return (
+      <div className="story-map-empty">
+        <strong>No Story Grid data yet.</strong>
+        <br /><br />
+        Open a scene and switch to the <em>Story Grid</em> tab in the right sidebar to fill in fields after drafting. The table populates as you go — you don't need every scene complete before it becomes useful.
+      </div>
+    );
   }
 
   return (
@@ -133,7 +148,22 @@ function PolarityArc({ scenes, onJumpToScene }: { scenes: Scene[]; onJumpToScene
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   if (scenes.length === 0) {
-    return <div className="story-map-empty">No scenes yet.</div>;
+    return (
+      <div className="story-map-empty">
+        No scenes yet. Add scenes to your novel to see the Polarity Arc.
+      </div>
+    );
+  }
+
+  const hasPolarity = scenes.some((s) => s.storyGrid?.polarity);
+  if (!hasPolarity) {
+    return (
+      <div className="story-map-empty">
+        <strong>No polarity data yet.</strong>
+        <br /><br />
+        Open each scene and set the <em>Polarity</em> field in the Story Grid tab. Once at least one scene has a polarity value, the arc will appear here.
+      </div>
+    );
   }
 
   const N = scenes.length;

@@ -9,6 +9,7 @@ import ReviewChecklist from './components/ReviewChecklist';
 import TagPanel from './components/TagPanel';
 import DictionaryPanel from './components/DictionaryPanel';
 import StoryMapPanel from './components/StoryMapPanel';
+import HelpModal from './components/HelpModal';
 import './App.css';
 
 export default function App() {
@@ -21,6 +22,7 @@ export default function App() {
   const [showTagPanel, setShowTagPanel] = useState(false);
   const [showDictionary, setShowDictionary] = useState(false);
   const [showStoryMap, setShowStoryMap] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
   const [editingNovelInfo, setEditingNovelInfo] = useState(false);
   const [mustEditJumpId, setMustEditJumpId] = useState<string | null>(null);
   const [planJumpKey, setPlanJumpKey] = useState<string | null>(null);
@@ -232,6 +234,7 @@ export default function App() {
           <button onClick={() => setShowTagPanel(true)}>Tags &amp; References</button>
           <button onClick={() => setShowStoryMap(true)}>Story Map</button>
           <button onClick={() => setShowReview(true)} disabled={!activeScene}>Review Checklist</button>
+          <button className="help-btn" onClick={() => setShowHelp(true)} title="How to use NovelWriter">?</button>
         </div>
       </header>
 
@@ -311,6 +314,10 @@ export default function App() {
           <div className="no-scene">Select or create a scene to begin writing.</div>
         )}
       </div>
+
+      {showHelp && (
+        <HelpModal onClose={() => setShowHelp(false)} />
+      )}
 
       {showStoryMap && (
         <StoryMapPanel

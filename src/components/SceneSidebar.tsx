@@ -97,6 +97,9 @@ export default function SceneSidebar({
 
           <div className="sidebar-section">
             <h3>Scene Plan</h3>
+            <p className="sidebar-hint">
+              Plan your scene before writing, then select passages and use <strong>¶ Anchor to Plan</strong> in the toolbar to link prose to each element.
+            </p>
             {(Object.keys(DEFAULT_SCENE_ELEMENT_LABELS) as Array<keyof SceneElements>).map((key) => {
               const label = DEFAULT_SCENE_ELEMENT_LABELS[key];
               const color = PLAN_ELEMENT_COLORS[key];
@@ -138,6 +141,9 @@ export default function SceneSidebar({
       {tab === 'grid' && (
         <div className="sidebar-section">
           <h3>Story Grid Data</h3>
+          <p className="sidebar-hint">
+            Fill these fields after drafting to track your scene's narrative function. View all scenes together in the <strong>Story Map</strong>.
+          </p>
 
           <div className="grid-field-group">
             <div className="grid-group-label">Scene Value</div>
