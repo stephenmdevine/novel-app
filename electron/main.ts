@@ -14,6 +14,90 @@ function ensureRoot() {
   }
 }
 
+function buildMenu(win: BrowserWindow) {
+  const isMac = process.platform === 'darwin';
+
+  const zoomIn = () => {
+    win.webContents.zoomLevel = win.webContents.zoomLevel + 0.5;
+  };
+  const zoomOut = () => {
+    win.webContents.zoomLevel = win.webContents.zoomLevel - 0.5;
+  };
+  const resetZoom = () => {
+    win.webContents.zoomLevel = 0;
+  };
+
+  const template: Electron.MenuItemConstructorOptions[] = [
+    ...(isMac ? [{ role: 'appMenu' as const }] : []),
+    { role: 'fileMenu' },
+    { role: 'editMenu' },
+    {
+      label: 'View',
+      submenu: [
+        { role: 'reload' },
+        { role: 'forceReload' },
+        { role: 'toggleDevTools' },
+        { type: 'separator' },
+        {
+          label: 'Actual Size',
+          accelerator: 'CmdOrCtrl+0',
+          click: resetZoom,
+        },
+        {
+          label: 'Actual Size (numpad)',
+          visible: false,
+          acceleratorWorksWhenHidden: true,
+          accelerator: 'CmdOrCtrl+num0',
+          click: resetZoom,
+        },
+        {
+          // NOTE: '+' is typed as Shift+= on most keyboards, and the
+          // accelerator string 'CmdOrCtrl+Plus' does not reliably match
+          // that Shift-modified keypress on Windows — it only fires when
+          // the menu item is clicked directly. Using the unshifted '='
+          // key as the primary accelerator is what actually works from
+          // the keyboard; 'Plus' is kept as a hidden fallback in case a
+          // given keyboard/layout does send an unmodified '+' keycode.
+          label: 'Zoom In',
+          accelerator: 'CmdOrCtrl+=',
+          click: zoomIn,
+        },
+        {
+          label: 'Zoom In (fallback)',
+          visible: false,
+          acceleratorWorksWhenHidden: true,
+          accelerator: 'CmdOrCtrl+Plus',
+          click: zoomIn,
+        },
+        {
+          label: 'Zoom In (numpad)',
+          visible: false,
+          acceleratorWorksWhenHidden: true,
+          accelerator: 'CmdOrCtrl+numadd',
+          click: zoomIn,
+        },
+        {
+          label: 'Zoom Out',
+          accelerator: 'CmdOrCtrl+-',
+          click: zoomOut,
+        },
+        {
+          label: 'Zoom Out (numpad)',
+          visible: false,
+          acceleratorWorksWhenHidden: true,
+          accelerator: 'CmdOrCtrl+numsub',
+          click: zoomOut,
+        },
+        { type: 'separator' },
+        { role: 'togglefullscreen' },
+      ],
+    },
+    { role: 'windowMenu' },
+  ];
+
+  Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+}
+
 function createWindow() {
   const win = new BrowserWindow({
     width: 1400,
@@ -24,6 +108,8 @@ function createWindow() {
       nodeIntegration: false,
     },
   });
+
+  buildMenu(win);
 
   // Enable Electron's built-in spellchecker
   win.webContents.session.setSpellCheckerEnabled(true);

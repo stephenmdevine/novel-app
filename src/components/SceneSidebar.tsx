@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Novel, Scene, SceneElements, TodoItem, StoryGridData } from '../types';
 import { DEFAULT_SCENE_ELEMENT_LABELS } from '../types';
 import { PLAN_ELEMENT_COLORS } from '../lib/ScenePlanMark';
@@ -46,6 +46,33 @@ export default function SceneSidebar({
   onJumpToPlanMark,
 }: SceneSidebarProps) {
   const [tab, setTab] = useState<SidebarTab>('plan');
+
+  // Whether the Scene Plan fields (Inciting Incident, etc.) are expanded.
+  // This is intentionally a single global preference, not per-scene —
+  // SceneSidebar isn't remounted when switching scenes, so this state
+  // naturally persists across scene navigation without extra plumbing.
+  const [planExpanded, setPlanExpanded] = useState(true);
+
+  // Auto-expand the section if the user anchors a *new* passage to a plan
+  // element from the editor while it's collapsed — otherwise the label
+  // would silently turn into a live jump link the user never sees appear.
+  // This must only fire for growth *within the same scene* — switching to
+  // a different scene naturally changes the anchor set too (that scene
+  // simply has its own pre-existing anchors), which isn't a "new anchor
+  // was just created" event and shouldn't force the section back open.
+  const prevSceneIdRef = useRef(scene.id);
+  const prevAnchorKeysRef = useRef(planAnchorKeys);
+  useEffect(() => {
+    const sceneChanged = prevSceneIdRef.current !== scene.id;
+    if (sceneChanged) {
+      prevSceneIdRef.current = scene.id;
+      prevAnchorKeysRef.current = planAnchorKeys;
+      return;
+    }
+    const grew = planAnchorKeys.size > prevAnchorKeysRef.current.size;
+    if (grew) setPlanExpanded(true);
+    prevAnchorKeysRef.current = planAnchorKeys;
+  }, [scene.id, planAnchorKeys]);
 
   const updateElement = (key: keyof SceneElements, value: string) => {
     onElementsChange({ ...scene.elements, [key]: value });
@@ -96,44 +123,56 @@ export default function SceneSidebar({
           </div>
 
           <div className="sidebar-section">
-            <h3>Scene Plan</h3>
-            <p className="sidebar-hint">
-              Plan your scene before writing, then select passages and use <strong>¶ Anchor to Plan</strong> in the toolbar to link prose to each element.
-            </p>
-            {(Object.keys(DEFAULT_SCENE_ELEMENT_LABELS) as Array<keyof SceneElements>).map((key) => {
-              const label = DEFAULT_SCENE_ELEMENT_LABELS[key];
-              const color = PLAN_ELEMENT_COLORS[key];
-              const anchored = planAnchorKeys.has(key);
-              return (
-                <div className="element-field" key={key}>
-                  <div className="element-label-row">
-                    <span
-                      className="plan-element-swatch"
-                      style={{ background: color }}
-                      title={`${label} anchor color`}
-                    />
-                    {anchored ? (
-                      <button
-                        className="element-label-btn"
-                        style={{ color }}
-                        onClick={() => onJumpToPlanMark(key)}
-                        title={`Jump to anchored ${label} text`}
-                      >
-                        {label} ↗
-                      </button>
-                    ) : (
-                      <label className="element-label-plain">{label}</label>
-                    )}
-                  </div>
-                  <textarea
-                    value={scene.elements[key]}
-                    onChange={(e) => updateElement(key, e.target.value)}
-                    placeholder={`Notes on the ${label.toLowerCase()}…`}
-                    rows={2}
-                  />
-                </div>
-              );
-            })}
+            <button
+              type="button"
+              className={`plan-section-header ${planExpanded ? 'expanded' : ''}`}
+              onClick={() => setPlanExpanded((e) => !e)}
+              aria-expanded={planExpanded}
+            >
+              <span className="plan-section-chevron">›</span>
+              <h3>Scene Plan</h3>
+            </button>
+            <div className={`plan-section-body ${planExpanded ? 'expanded' : ''}`}>
+              <div className="plan-section-body-inner">
+                <p className="sidebar-hint">
+                  Plan your scene before writing, then select passages and use <strong>¶ Anchor to Plan</strong> in the toolbar to link prose to each element.
+                </p>
+                {(Object.keys(DEFAULT_SCENE_ELEMENT_LABELS) as Array<keyof SceneElements>).map((key) => {
+                  const label = DEFAULT_SCENE_ELEMENT_LABELS[key];
+                  const color = PLAN_ELEMENT_COLORS[key];
+                  const anchored = planAnchorKeys.has(key);
+                  return (
+                    <div className="element-field" key={key}>
+                      <div className="element-label-row">
+                        <span
+                          className="plan-element-swatch"
+                          style={{ background: color }}
+                          title={`${label} anchor color`}
+                        />
+                        {anchored ? (
+                          <button
+                            className="element-label-btn"
+                            style={{ color }}
+                            onClick={() => onJumpToPlanMark(key)}
+                            title={`Jump to anchored ${label} text`}
+                          >
+                            {label} ↗
+                          </button>
+                        ) : (
+                          <label className="element-label-plain">{label}</label>
+                        )}
+                      </div>
+                      <textarea
+                        value={scene.elements[key]}
+                        onChange={(e) => updateElement(key, e.target.value)}
+                        placeholder={`Notes on the ${label.toLowerCase()}…`}
+                        rows={2}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </>
       )}

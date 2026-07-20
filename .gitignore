@@ -3,4 +3,5 @@ dist/
 dist-electron/
 release/
 *.log
+*.cjs
 .DS_Store

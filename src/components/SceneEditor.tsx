@@ -344,8 +344,13 @@ export default function SceneEditor({
               <select className="tag-form-input" value={newTagType}
                 onChange={(e) => setNewTagType(e.target.value as Tag['type'])}>
                 <option value="character">Character</option>
+                <option value="species">Species</option>
                 <option value="location">Location</option>
                 <option value="item">Item</option>
+                <option value="powers">Powers</option>
+                <option value="event">Event</option>
+                <option value="culture">Culture/Religion</option>
+                <option value="faction">Faction/Organization</option>
                 <option value="other">Other</option>
               </select>
               <div className="tag-form-actions">

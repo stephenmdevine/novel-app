@@ -10,6 +10,9 @@ import TagPanel from './components/TagPanel';
 import DictionaryPanel from './components/DictionaryPanel';
 import StoryMapPanel from './components/StoryMapPanel';
 import HelpModal from './components/HelpModal';
+import ConfirmDialog from './components/ConfirmDialog';
+import ToastContainer from './components/ToastContainer';
+import type { ToastItem } from './components/ToastContainer';
 import './App.css';
 
 export default function App() {
@@ -28,11 +31,29 @@ export default function App() {
   const [planJumpKey, setPlanJumpKey] = useState<string | null>(null);
   const [planAnchorKeys, setPlanAnchorKeys] = useState<Set<string>>(new Set());
 
+  // ----- Confirm dialog + toast state (added for release polish) -----
+  const [confirmState, setConfirmState] = useState<{
+    title: string;
+    message: string;
+    confirmLabel?: string;
+    onConfirm: () => void;
+  } | null>(null);
+  const [toasts, setToasts] = useState<ToastItem[]>([]);
+
+  const showError = (message: string) => {
+    setToasts((prev) => [...prev, { id: crypto.randomUUID(), message }]);
+  };
+  const dismissToast = (id: string) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  };
+
   const activeNovel = novels.find((n) => n.id === activeNovelId) ?? null;
   const activeScene = scenes.find((s) => s.id === activeSceneId) ?? null;
 
   useEffect(() => {
-    window.api.listNovels().then(setNovels);
+    window.api.listNovels().then(setNovels).catch(() => {
+      showError('Failed to load novels.');
+    });
   }, []);
 
   useEffect(() => {
@@ -42,56 +63,92 @@ export default function App() {
       setActiveSceneId(s[0]?.id ?? null);
       syncNovelStats(s);
       setPlanAnchorKeys(new Set());
+    }).catch(() => {
+      showError('Failed to load scenes for this novel.');
     });
-    window.api.listTags(activeNovelId).then(setTags);
+    window.api.listTags(activeNovelId).then(setTags).catch(() => {
+      showError('Failed to load tags for this novel.');
+    });
   }, [activeNovelId]);
 
   // ----- Novel CRUD -----
   const handleCreateNovel = async (title: string, genres: string[], theme: string) => {
     const novel = createEmptyNovel(title, genres, theme);
-    await window.api.createNovel(novel);
-    setNovels((prev) => [...prev, novel]);
+    try {
+      await window.api.createNovel(novel);
+      setNovels((prev) => [...prev, novel]);
+    } catch {
+      showError('Failed to create novel. Please try again.');
+    }
   };
 
-  const handleDeleteNovel = async (novelId: string) => {
-    if (!confirm('Delete this novel and all its scenes? This cannot be undone.')) return;
-    await window.api.deleteNovel(novelId);
-    setNovels((prev) => prev.filter((n) => n.id !== novelId));
-    if (activeNovelId === novelId) setActiveNovelId(null);
+  const handleDeleteNovel = (novelId: string) => {
+    setConfirmState({
+      title: 'Delete novel?',
+      message: 'This will permanently delete this novel and all its scenes. This cannot be undone.',
+      onConfirm: async () => {
+        setConfirmState(null);
+        try {
+          await window.api.deleteNovel(novelId);
+          setNovels((prev) => prev.filter((n) => n.id !== novelId));
+          if (activeNovelId === novelId) setActiveNovelId(null);
+        } catch {
+          showError('Failed to delete novel. Please try again.');
+        }
+      },
+    });
   };
 
   const handleSaveNovelMeta = async (updates: Partial<Novel>) => {
     if (!activeNovel) return;
     const updated = { ...activeNovel, ...updates, updatedAt: new Date().toISOString() };
-    await window.api.saveNovel(updated);
-    setNovels((prev) => prev.map((n) => (n.id === updated.id ? updated : n)));
+    try {
+      await window.api.saveNovel(updated);
+      setNovels((prev) => prev.map((n) => (n.id === updated.id ? updated : n)));
+    } catch {
+      showError('Failed to save novel details.');
+    }
   };
 
   // ----- Scene CRUD -----
   const handleAddScene = async () => {
     if (!activeNovelId) return;
     const scene = createEmptyScene(scenes.length);
-    await window.api.saveScene(activeNovelId, scene);
-    setScenes((prev) => {
-      const updated = [...prev, scene];
-      syncNovelStats(updated);
-      return updated;
-    });
-    setActiveSceneId(scene.id);
+    try {
+      await window.api.saveScene(activeNovelId, scene);
+      setScenes((prev) => {
+        const updated = [...prev, scene];
+        syncNovelStats(updated);
+        return updated;
+      });
+      setActiveSceneId(scene.id);
+    } catch {
+      showError('Failed to create scene. Please try again.');
+    }
   };
 
-  const handleDeleteScene = async (sceneId: string) => {
+  const handleDeleteScene = (sceneId: string) => {
     if (!activeNovelId) return;
-    if (!confirm('Delete this scene?')) return;
-    await window.api.deleteScene(activeNovelId, sceneId);
-    setScenes((prev) => {
-      const updated = prev.filter((s) => s.id !== sceneId);
-      syncNovelStats(updated);
-      return updated;
+    setConfirmState({
+      title: 'Delete scene?',
+      message: 'This scene will be permanently deleted. This cannot be undone.',
+      onConfirm: async () => {
+        setConfirmState(null);
+        try {
+          await window.api.deleteScene(activeNovelId, sceneId);
+          setScenes((prev) => {
+            const updated = prev.filter((s) => s.id !== sceneId);
+            syncNovelStats(updated);
+            return updated;
+          });
+          if (activeSceneId === sceneId) {
+            setActiveSceneId(scenes.find((s) => s.id !== sceneId)?.id ?? null);
+          }
+        } catch {
+          showError('Failed to delete scene. Please try again.');
+        }
+      },
     });
-    if (activeSceneId === sceneId) {
-      setActiveSceneId(scenes.find((s) => s.id !== sceneId)?.id ?? null);
-    }
   };
 
   const handleRenameScene = (sceneId: string, title: string) => {
@@ -102,9 +159,13 @@ export default function App() {
   const handleReorderScenes = async (reordered: Scene[]) => {
     setScenes(reordered);
     syncNovelStats(reordered);
-    await Promise.all(
-      reordered.map((s) => window.api.saveScene(activeNovelId!, s))
-    );
+    try {
+      await Promise.all(
+        reordered.map((s) => window.api.saveScene(activeNovelId!, s))
+      );
+    } catch {
+      showError('Failed to save new scene order. Please try reordering again.');
+    }
   };
 
   const handleEditorChange = (html: string, wordCount: number) => {
@@ -161,7 +222,7 @@ export default function App() {
     handleTodosChange(todos);
   };
 
-  const syncNovelStats = (currentScenes: Scene[]) => {
+  const syncNovelStats = async (currentScenes: Scene[]) => {
     if (!activeNovel) return;
     const totalWordCount = currentScenes.reduce((sum, s) => sum + s.wordCount, 0);
     const sceneCount = currentScenes.length;
@@ -169,7 +230,11 @@ export default function App() {
     if (activeNovel.totalWordCount === totalWordCount && activeNovel.sceneCount === sceneCount) return;
     const updated = { ...activeNovel, totalWordCount, sceneCount };
     setNovels((prev) => prev.map((n) => (n.id === updated.id ? updated : n)));
-    window.api.saveNovel(updated);
+    try {
+      await window.api.saveNovel(updated);
+    } catch {
+      showError('Failed to save updated word count.');
+    }
   };
 
   const persistScene = async (sceneId: string, updates: Partial<Scene>) => {
@@ -177,7 +242,11 @@ export default function App() {
     const scene = scenes.find((s) => s.id === sceneId);
     if (!scene) return;
     const updated = { ...scene, ...updates, updatedAt: new Date().toISOString() };
-    await window.api.saveScene(activeNovelId, updated);
+    try {
+      await window.api.saveScene(activeNovelId, updated);
+    } catch {
+      showError('Failed to save changes. Please check your disk space and try again.');
+    }
   };
 
   // ----- Tag operations -----
@@ -185,31 +254,55 @@ export default function App() {
     const tag: Tag = { id: crypto.randomUUID(), name, type, attributes: {} };
     const updated = [...tags, tag];
     setTags(updated);
-    if (activeNovelId) window.api.saveTags(activeNovelId, updated);
+    if (activeNovelId) {
+      window.api.saveTags(activeNovelId, updated).catch(() => {
+        showError('Failed to save new tag.');
+      });
+    }
     return tag;
   };
 
   const handleUpdateTag = (tag: Tag) => {
     const updated = tags.map((t) => (t.id === tag.id ? tag : t));
     setTags(updated);
-    if (activeNovelId) window.api.saveTags(activeNovelId, updated);
+    if (activeNovelId) {
+      window.api.saveTags(activeNovelId, updated).catch(() => {
+        showError('Failed to save tag changes.');
+      });
+    }
   };
 
   const handleDeleteTag = (tagId: string) => {
     const updated = tags.filter((t) => t.id !== tagId);
     setTags(updated);
-    if (activeNovelId) window.api.saveTags(activeNovelId, updated);
+    if (activeNovelId) {
+      window.api.saveTags(activeNovelId, updated).catch(() => {
+        showError('Failed to save tag deletion.');
+      });
+    }
   };
 
   // ----- Render -----
   if (!activeNovel) {
     return (
-      <NovelLibrary
-        novels={novels}
-        onOpen={setActiveNovelId}
-        onCreate={handleCreateNovel}
-        onDelete={handleDeleteNovel}
-      />
+      <>
+        <NovelLibrary
+          novels={novels}
+          onOpen={setActiveNovelId}
+          onCreate={handleCreateNovel}
+          onDelete={handleDeleteNovel}
+        />
+        {confirmState && (
+          <ConfirmDialog
+            title={confirmState.title}
+            message={confirmState.message}
+            confirmLabel={confirmState.confirmLabel}
+            onConfirm={confirmState.onConfirm}
+            onCancel={() => setConfirmState(null)}
+          />
+        )}
+        <ToastContainer toasts={toasts} onDismiss={dismissToast} />
+      </>
     );
   }
 
@@ -350,6 +443,17 @@ export default function App() {
       {showDictionary && (
         <DictionaryPanel onClose={() => setShowDictionary(false)} />
       )}
+
+      {confirmState && (
+        <ConfirmDialog
+          title={confirmState.title}
+          message={confirmState.message}
+          confirmLabel={confirmState.confirmLabel}
+          onConfirm={confirmState.onConfirm}
+          onCancel={() => setConfirmState(null)}
+        />
+      )}
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
     </div>
   );
 }

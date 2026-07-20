@@ -1,6 +1,20 @@
-import { useState } from 'react';
-import type { Tag, Scene } from '../types';
+import { useEffect, useState } from 'react';
+import type { Tag, TagType, Scene } from '../types';
 import './TagPanel.css';
+
+// Fixed display order for the type accordion — mirrors the <select> option
+// order used when creating/reclassifying a tag.
+const TAG_TYPE_ORDER: { type: TagType; label: string }[] = [
+  { type: 'character', label: 'Character' },
+  { type: 'species', label: 'Species' },
+  { type: 'location', label: 'Location' },
+  { type: 'item', label: 'Item' },
+  { type: 'powers', label: 'Powers' },
+  { type: 'event', label: 'Event' },
+  { type: 'culture', label: 'Culture/Religion' },
+  { type: 'faction', label: 'Faction/Organization' },
+  { type: 'other', label: 'Other' },
+];
 
 interface TagPanelProps {
   tags: Tag[];
@@ -16,6 +30,31 @@ export default function TagPanel({ tags, scenes, onUpdateTag, onDeleteTag, onClo
   const [addingAttr, setAddingAttr] = useState(false);
   const [newAttrKey, setNewAttrKey] = useState('');
   const selectedTag = tags.find((t) => t.id === selectedTagId) ?? null;
+
+  // Only one type group is expanded at a time. It defaults to whichever
+  // type the selected tag belongs to, and re-syncs whenever the selected
+  // tag changes — including when the tag itself is reclassified to a new
+  // type, so the accordion follows it there automatically.
+  const [expandedType, setExpandedType] = useState<TagType | null>(tags[0]?.type ?? null);
+
+  useEffect(() => {
+    if (selectedTag) setExpandedType(selectedTag.type);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedTag?.id, selectedTag?.type]);
+
+  const groupedTags = TAG_TYPE_ORDER
+    .map(({ type, label }) => ({ type, label, items: tags.filter((t) => t.type === type) }))
+    .filter((group) => group.items.length > 0);
+
+  const toggleGroup = (type: TagType) => {
+    setExpandedType((prev) => (prev === type ? null : type));
+  };
+
+  const selectTag = (tagId: string) => {
+    setSelectedTagId(tagId);
+    setAddingAttr(false);
+    setNewAttrKey('');
+  };
 
   // Find scenes that reference this tag (by data-tag-id in content HTML)
   const referencingScenes = selectedTag
@@ -69,15 +108,36 @@ export default function TagPanel({ tags, scenes, onUpdateTag, onDeleteTag, onClo
         </div>
         <div className="tag-panel-body">
           <div className="tag-list-col">
-            {tags.map((tag) => (
-              <div
-                key={tag.id}
-                className={`tag-list-item ${tag.id === selectedTagId ? 'active' : ''}`}
-                onClick={() => { setSelectedTagId(tag.id); setAddingAttr(false); setNewAttrKey(''); }}
-              >
-                <span className={`tag-dot tag-${tag.type}`} /> {tag.name}
-              </div>
-            ))}
+            {groupedTags.map((group) => {
+              const isExpanded = expandedType === group.type;
+              return (
+                <div className="tag-group" key={group.type}>
+                  <button
+                    type="button"
+                    className={`tag-group-header ${isExpanded ? 'expanded' : ''}`}
+                    onClick={() => toggleGroup(group.type)}
+                  >
+                    <span className={`tag-dot tag-${group.type}`} />
+                    <span className="tag-group-label">{group.label}</span>
+                    <span className="tag-group-count">{group.items.length}</span>
+                    <span className="tag-group-chevron">›</span>
+                  </button>
+                  <div className={`tag-group-body ${isExpanded ? 'expanded' : ''}`}>
+                    <div className="tag-group-body-inner">
+                      {group.items.map((tag) => (
+                        <div
+                          key={tag.id}
+                          className={`tag-list-item ${tag.id === selectedTagId ? 'active' : ''}`}
+                          onClick={() => selectTag(tag.id)}
+                        >
+                          <span className={`tag-dot tag-${tag.type}`} /> {tag.name}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
             {tags.length === 0 && <div className="tag-empty">No tags created yet. Select text in the editor and use "Tag Selection".</div>}
           </div>
 
@@ -102,8 +162,13 @@ export default function TagPanel({ tags, scenes, onUpdateTag, onDeleteTag, onClo
                   onChange={(e) => onUpdateTag({ ...selectedTag, type: e.target.value as Tag['type'] })}
                 >
                   <option value="character">Character</option>
+                  <option value="species">Species</option>
                   <option value="location">Location</option>
                   <option value="item">Item</option>
+                  <option value="powers">Powers</option>
+                  <option value="event">Event</option>
+                  <option value="culture">Culture/Religion</option>
+                  <option value="faction">Faction/Organization</option>
                   <option value="other">Other</option>
                 </select>
 

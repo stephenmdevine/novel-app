@@ -265,6 +265,11 @@
 .tag-character { background: #5b8def; }
 .tag-location { background: #4caf50; }
 .tag-item { background: #ffb74d; }
+.tag-species { background: #26c6da; }
+.tag-powers { background: #ef5350; }
+.tag-event { background: #d4af37; }
+.tag-culture { background: #f06292; }
+.tag-faction { background: #78909c; }
 .tag-other { background: #b39ddb; }
 
 /* ---- Scene Plan mark highlights ---- */

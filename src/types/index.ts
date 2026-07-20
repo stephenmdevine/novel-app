@@ -79,7 +79,16 @@ export interface Scene {
 
 // ---------- Tags ----------
 
-export type TagType = 'character' | 'location' | 'item' | 'other';
+export type TagType =
+  | 'character'
+  | 'location'
+  | 'item'
+  | 'species'
+  | 'powers'
+  | 'event'
+  | 'culture'
+  | 'faction'
+  | 'other';
 
 export interface Tag {
   id: string;
